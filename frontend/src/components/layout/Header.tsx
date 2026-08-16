@@ -23,6 +23,14 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    e.currentTarget.style.setProperty('--glass-x', `${x}%`);
+    e.currentTarget.style.setProperty('--glass-y', `${y}%`);
+  };
+
   const navLinks: GooeyNavItem[] = useMemo(
     () => [
       { label: 'Scanner', href: '/' },
@@ -51,18 +59,17 @@ export const Header: React.FC = () => {
   return (
     <header className="sticky top-3 sm:top-4 z-40 w-full px-3 sm:px-6 lg:px-8 pointer-events-none">
       <div className="max-w-7xl mx-auto pointer-events-auto">
-        {/* Floating Navbar Pill Container */}
+        {/* Floating Apple Liquid Glass Navbar Container */}
         <div
+          onMouseMove={handleMouseMove}
           className={cn(
-            'rounded-2xl sm:rounded-[20px] border transition-all duration-200 px-3.5 sm:px-5 lg:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4 shadow-xl',
-            isScrolled
-              ? 'border-[rgba(243,240,232,0.18)] bg-[#0C0F14]/95 backdrop-blur-2xl shadow-2xl shadow-black/80'
-              : 'border-[rgba(243,240,232,0.10)] bg-[#0C0F14]/85 backdrop-blur-xl shadow-black/50'
+            'liquid-glass-navbar rounded-[22px] sm:rounded-[26px] px-3.5 sm:px-5 lg:px-6 h-14 sm:h-16 flex items-center justify-between gap-2 sm:gap-4',
+            isScrolled && 'scrolled'
           )}
         >
           {/* Left: Brand Logo & Wordmark */}
-          <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-            <Link to="/" className="flex items-center focus:outline-none" aria-label="WebLens Home">
+          <div className="flex items-center gap-3 sm:gap-6 shrink-0 relative z-10">
+            <Link to="/" className="flex items-center focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] rounded-xl" aria-label="WebLens Home">
               <WebLensLogo size="md" />
             </Link>
 
@@ -83,10 +90,10 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Right: Workspace Status Pill & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 relative z-10">
             <Link
               to="/profile"
-              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl bg-[#11151B] border border-[rgba(243,240,232,0.10)] hover:border-[#FF6B35]/40 text-[11px] sm:text-xs font-medium text-[#D8D4CA] hover:text-[#F3F0E8] transition-all shadow-sm group"
+              className="liquid-glass-capsule inline-flex items-center gap-1.5 px-2.5 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-display font-medium text-[#D8D4CA] hover:text-[#F3F0E8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] group"
               title="Local browser workspace & storage settings"
             >
               <HardDrive className="w-3.5 h-3.5 text-[#FF6B35] group-hover:text-[#FF804F] shrink-0" />
@@ -98,7 +105,7 @@ export const Header: React.FC = () => {
             {/* Mobile / Tablet Menu Button */}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="lg:hidden p-1.5 sm:p-2 rounded-xl bg-[#11151B] border border-[rgba(243,240,232,0.10)] text-[#8E8A82] hover:text-[#F3F0E8] focus:outline-none transition-colors"
+              className="liquid-glass-capsule lg:hidden p-1.5 sm:p-2 rounded-xl text-[#8E8A82] hover:text-[#F3F0E8] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35]"
               aria-label="Toggle Navigation Menu"
             >
               {mobileMenuOpen ? <X className="w-4 h-4 sm:w-5 sm:h-5" /> : <Menu className="w-4 h-4 sm:w-5 sm:h-5" />}
@@ -106,9 +113,9 @@ export const Header: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile / Tablet Floating Drawer Dropdown */}
+        {/* Mobile / Tablet Floating Liquid Glass Drawer */}
         {mobileMenuOpen && (
-          <div className="lg:hidden mt-2 rounded-2xl border border-[rgba(243,240,232,0.14)] bg-[#0C0F14]/95 p-3 space-y-1.5 backdrop-blur-2xl shadow-2xl shadow-black/80 animate-fade-in pointer-events-auto">
+          <div className="liquid-glass-drawer lg:hidden mt-2 rounded-2xl p-3 space-y-1.5 animate-fade-in pointer-events-auto">
             {navLinks.map((link, idx) => {
               const isActive = activeIndex === idx;
               return (
@@ -117,10 +124,10 @@ export const Header: React.FC = () => {
                   to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
-                    'block px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all',
+                    'block px-3.5 py-2.5 rounded-xl text-xs font-display font-semibold transition-all',
                     isActive
-                      ? 'bg-[#F3F0E8] text-[#080A0E] font-bold shadow-md shadow-[#FF6B35]/15'
-                      : 'text-[#D8D4CA] hover:text-[#F3F0E8] hover:bg-[#151A21]'
+                      ? 'bg-gradient-to-r from-[#F3F0E8] to-[#D8D4CA] text-[#080A0E] font-bold shadow-md shadow-[#FF6B35]/20'
+                      : 'text-[#D8D4CA] hover:text-[#F3F0E8] hover:bg-[#151A21]/60'
                   )}
                 >
                   {link.label}
