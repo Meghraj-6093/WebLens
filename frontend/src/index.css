@@ -140,6 +140,66 @@
 }
 
 /* ========================================================= */
+/* ULTRA-SMOOTH GLOBAL PAGE TRANSITION SYSTEM                */
+/* ========================================================= */
+@keyframes weblensPageEnter {
+  0% {
+    opacity: 0.94;
+    transform: translate3d(0, 6px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.weblens-page-transition {
+  animation: weblensPageEnter 280ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: transform, opacity;
+}
+
+/* Native View Transition Layer Blending */
+::view-transition-old(root) {
+  animation: 120ms cubic-bezier(0.22, 1, 0.36, 1) both weblensViewExit;
+}
+
+::view-transition-new(root) {
+  animation: 280ms cubic-bezier(0.22, 1, 0.36, 1) both weblensViewEnter;
+}
+
+@keyframes weblensViewExit {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    opacity: 0.96;
+    transform: translate3d(0, -4px, 0);
+  }
+}
+
+@keyframes weblensViewEnter {
+  0% {
+    opacity: 0.96;
+    transform: translate3d(0, 6px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Reduced Motion Override */
+@media (prefers-reduced-motion: reduce) {
+  .weblens-page-transition,
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
+/* ========================================================= */
 /* CLIENT-READY PRINT & PDF EXPORT STYLESHEET                */
 /* ========================================================= */
 @media print {

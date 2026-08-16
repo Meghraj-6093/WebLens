@@ -15,31 +15,34 @@ import { CompetitorPage } from './pages/CompetitorPage.js';
 import { AgencyPage } from './pages/AgencyPage.js';
 import { ApiKeysPage } from './pages/ApiKeysPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
+import { PageTransition } from './components/layout/PageTransition.js';
 
 export const App: React.FC = () => {
   return (
     <ErrorBoundary>
       <div className="min-h-screen bg-[#080A0E] text-[#F3F0E8] flex flex-col font-sans selection:bg-[#FF6B35] selection:text-[#080A0E]">
         <Header />
-        <main className="flex-1 pt-4 sm:pt-6">
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<DashboardPage />} />
-            <Route path="/monitoring" element={<MonitoringPage />} />
-            <Route path="/competitors" element={<CompetitorPage />} />
-            <Route path="/competitor" element={<CompetitorPage />} />
-            <Route path="/agency" element={<AgencyPage />} />
-            <Route path="/developers" element={<ApiKeysPage />} />
-            <Route path="/developer-api" element={<ApiKeysPage />} />
-            <Route path="/api" element={<ApiKeysPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/settings" element={<ProfilePage />} />
-            <Route path="/projects" element={<ProjectsPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-            <Route path="/compare" element={<ComparePage />} />
-            <Route path="/scan/:id" element={<ScanProgressPage />} />
-            <Route path="/report/:id" element={<ReportPage />} />
-          </Routes>
+        <main className="flex-1 pt-4 sm:pt-6 flex flex-col">
+          <PageTransition>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/dashboard" element={<DashboardPage />} />
+              <Route path="/monitoring" element={<MonitoringPage />} />
+              <Route path="/competitors" element={<CompetitorPage />} />
+              <Route path="/competitor" element={<CompetitorPage />} />
+              <Route path="/agency" element={<AgencyPage />} />
+              <Route path="/developers" element={<ApiKeysPage />} />
+              <Route path="/developer-api" element={<ApiKeysPage />} />
+              <Route path="/api" element={<ApiKeysPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/settings" element={<ProfilePage />} />
+              <Route path="/projects" element={<ProjectsPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+              <Route path="/compare" element={<ComparePage />} />
+              <Route path="/scan/:id" element={<ScanProgressPage />} />
+              <Route path="/report/:id" element={<ReportPage />} />
+            </Routes>
+          </PageTransition>
         </main>
         <Footer />
       </div>
