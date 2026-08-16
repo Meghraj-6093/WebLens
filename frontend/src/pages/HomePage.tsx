@@ -48,7 +48,7 @@ export const HomePage: React.FC = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
       {/* Background Energy Glow */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[420px] bg-gradient-to-b from-[#FF6B35]/10 via-[#FF6B35]/3 to-transparent blur-3xl -z-10 pointer-events-none" />
+      <div className="absolute top-36 left-1/2 -translate-x-1/2 w-full max-w-5xl h-[360px] bg-gradient-to-b from-[#FF6B35]/6 via-[#FF6B35]/2 to-transparent blur-3xl -z-10 pointer-events-none" />
 
       {/* Hero Section */}
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 text-center space-y-10">
