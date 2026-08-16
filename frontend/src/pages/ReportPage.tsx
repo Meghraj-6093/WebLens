@@ -202,7 +202,7 @@ export const ReportPage: React.FC = () => {
       />
 
       {/* 3. Sticky Tab Navigation Bar */}
-      <div className="sticky top-16 z-30 bg-[#070B14]/95 backdrop-blur-md -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-2.5 border-y border-slate-800/80 shadow-lg">
+      <div className="sticky top-20 sm:top-24 z-30 bg-[#070B14]/95 backdrop-blur-md -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-2.5 border-y border-slate-800/80 shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-px">
           {navTabs.map((tab) => {
             const isActive = activeTab === tab.id;

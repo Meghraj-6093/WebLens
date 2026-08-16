@@ -53,9 +53,9 @@ export const HomePage: React.FC = () => {
       {/* Hero Section */}
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 text-center space-y-10">
         {/* Capability Pill */}
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold shadow-sm">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Local-First Website Diagnostics • Lighthouse • SEO • A11y • Security</span>
+        <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[11px] sm:text-xs font-semibold shadow-sm max-w-full text-center">
+          <Sparkles className="w-3.5 h-3.5 shrink-0" />
+          <span className="truncate sm:whitespace-normal">Local-First Diagnostics • Lighthouse • SEO • Security</span>
         </div>
 
         {/* Headline */}
@@ -121,7 +121,7 @@ export const HomePage: React.FC = () => {
         </div>
 
         {/* Capability Badges Strip */}
-        <div className="pt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 max-w-4xl mx-auto">
+        <div className="pt-4 grid grid-cols-1 min-[360px]:grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3 max-w-4xl mx-auto">
           {[
             { label: 'Performance', score: '25%', icon: <Zap className="w-4 h-4 text-amber-400" /> },
             { label: 'SEO Audit', score: '20%', icon: <Globe className="w-4 h-4 text-blue-400" /> },
@@ -134,11 +134,11 @@ export const HomePage: React.FC = () => {
               key={i}
               className="card-glow rounded-xl p-3 border border-slate-800/80 flex items-center justify-between gap-2 text-xs font-medium text-slate-300"
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 min-w-0">
                 {c.icon}
                 <span className="truncate">{c.label}</span>
               </div>
-              <span className="text-[10px] font-mono text-slate-500">{c.score}</span>
+              <span className="text-[10px] font-mono text-slate-500 shrink-0">{c.score}</span>
             </div>
           ))}
         </div>
