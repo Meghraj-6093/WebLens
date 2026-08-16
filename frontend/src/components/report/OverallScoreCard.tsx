@@ -38,7 +38,6 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
       setCopiedShare(true);
       setTimeout(() => setCopiedShare(false), 2500);
     } catch {
-      // Fallback copy current URL
       await navigator.clipboard.writeText(window.location.href);
       setCopiedShare(true);
       setTimeout(() => setCopiedShare(false), 2500);
@@ -52,12 +51,12 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
   };
 
   return (
-    <div className="card-glow rounded-2xl p-6 sm:p-8 border border-slate-800 relative overflow-hidden">
-      {/* Subtle background gradient radial glow */}
+    <div className="card-glow rounded-3xl p-6 sm:p-8 border border-slate-800 relative overflow-hidden">
+      {/* Background Radial Glow */}
       <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl pointer-events-none" />
 
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-8 relative z-10">
-        {/* Left Info & Domain */}
+        {/* Left Info & Domain Details */}
         <div className="space-y-4 max-w-xl">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-medium">
@@ -71,14 +70,14 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
           </div>
 
           <div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2">
+            <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
               <span>{scan.domain}</span>
               <a
                 href={scan.normalizedUrl}
                 target="_blank"
                 rel="noreferrer"
                 className="text-slate-500 hover:text-blue-400 transition-colors inline-flex"
-                title="Visit website"
+                title="Open analyzed website"
               >
                 <ExternalLink className="w-5 h-5" />
               </a>
@@ -88,10 +87,10 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
             </p>
           </div>
 
-          {/* Issue Breakdown Stat Pills */}
-          <div className="flex flex-wrap items-center gap-3 pt-1">
+          {/* Issue Breakdown Summary Badges */}
+          <div className="flex flex-wrap items-center gap-2.5 pt-1">
             {total.critical > 0 && (
-              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-400 text-xs font-bold animate-pulse">
                 <ShieldAlert className="w-3.5 h-3.5" />
                 {total.critical} Critical
               </div>
@@ -108,13 +107,18 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
                 {total.medium} Medium
               </div>
             )}
+            {total.low > 0 && (
+              <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
+                {total.low} Low
+              </div>
+            )}
             <div className="flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
               <CheckCircle2 className="w-3.5 h-3.5" />
               {total.passed} Passed Checks
             </div>
           </div>
 
-          {/* Action CTAs */}
+          {/* Quick Actions */}
           <div className="flex flex-wrap items-center gap-3 pt-2">
             {onRescan && (
               <Button
@@ -131,9 +135,9 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
               size="sm"
               onClick={handleShare}
               isLoading={isSharing}
-              leftIcon={copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+              leftIcon={copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5 text-blue-400" />}
             >
-              {copiedShare ? 'Link Copied!' : 'Share Report'}
+              {copiedShare ? 'Share Link Copied!' : 'Share Report'}
             </Button>
             <Button
               variant="outline"
@@ -146,8 +150,8 @@ export const OverallScoreCard: React.FC<OverallScoreCardProps> = ({ report, onRe
           </div>
         </div>
 
-        {/* Right Gauge */}
-        <div className="shrink-0 flex flex-col items-center justify-center p-6 bg-slate-900/60 rounded-2xl border border-slate-800/80 w-full lg:w-auto">
+        {/* Right Hero Score Gauge */}
+        <div className="shrink-0 flex flex-col items-center justify-center p-6 sm:p-8 bg-slate-900/70 rounded-3xl border border-slate-800 shadow-2xl w-full lg:w-auto">
           <ScoreGauge
             score={overall.score}
             size="lg"

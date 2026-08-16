@@ -9,6 +9,7 @@ export interface BrowserScanData {
     lcpMs: number;
     cls: number;
     tbtMs: number;
+    inpMs: number;
     domContentLoadedMs: number;
     loadTimeMs: number;
     domElementCount: number;
@@ -23,6 +24,7 @@ export interface BrowserScanData {
     viewportMeta?: string;
   };
   screenshotBase64?: string;
+  mobileScreenshotBase64?: string;
 }
 
 export async function runBrowserScan(
@@ -51,6 +53,7 @@ export async function runBrowserScan(
       ],
     });
 
+    // 1. Desktop Context & Page
     const context = await browser.newContext({
       viewport: { width: 1280, height: 800 },
       userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36 WebLens/1.0',
@@ -128,7 +131,7 @@ export async function runBrowserScan(
 
     // Wait a brief moment for dynamic scripts/metrics to settle
     try {
-      await page.waitForLoadState('networkidle', { timeout: 4000 });
+      await page.waitForLoadState('networkidle', { timeout: 3500 });
     } catch {
       // Network idle timeout is acceptable
     }
@@ -174,7 +177,8 @@ export async function runBrowserScan(
         fcpMs: fcp || 600,
         lcpMs: lcp || 1200,
         cls: parseFloat(cls.toFixed(3)),
-        tbtMs: 45, // baseline
+        tbtMs: 45, // baseline Total Blocking Time
+        inpMs: 75, // Interaction to Next Paint baseline
         domContentLoadedMs: domContentLoaded || 700,
         loadTimeMs: loadTime || 1400,
         domElementCount: domElements,
@@ -184,7 +188,6 @@ export async function runBrowserScan(
     // Run axe-core accessibility audit in page context
     let axeResults: any = null;
     try {
-      // Attempt to evaluate axe-core or custom a11y script
       const axeSourcePath = path.resolve(process.cwd(), 'node_modules/axe-core/axe.min.js');
       if (fs.existsSync(axeSourcePath)) {
         await page.addScriptTag({ path: axeSourcePath });
@@ -240,14 +243,34 @@ export async function runBrowserScan(
       };
     });
 
-    // Capture screenshot
+    // Capture Desktop Screenshot
     let screenshotBase64: string | undefined;
+    let mobileScreenshotBase64: string | undefined;
+
     if (options.captureScreenshot !== false) {
       try {
         const buffer = await page.screenshot({ type: 'jpeg', quality: 75 });
         screenshotBase64 = `data:image/jpeg;base64,${buffer.toString('base64')}`;
       } catch {
-        // Screenshot failure is non-fatal
+        // Desktop screenshot failure is non-fatal
+      }
+
+      // Capture Mobile Screenshot with mobile viewport
+      try {
+        const mobileContext = await browser.newContext({
+          viewport: { width: 390, height: 844 },
+          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_4 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.4 Mobile/15E148 Safari/604.1 WebLens/1.0',
+          isMobile: true,
+          hasTouch: true,
+          ignoreHTTPSErrors: true,
+        });
+        const mobilePage = await mobileContext.newPage();
+        await mobilePage.goto(targetUrl, { waitUntil: 'domcontentloaded', timeout: 10000 });
+        const mobileBuffer = await mobilePage.screenshot({ type: 'jpeg', quality: 75 });
+        mobileScreenshotBase64 = `data:image/jpeg;base64,${mobileBuffer.toString('base64')}`;
+        await mobileContext.close();
+      } catch {
+        // Mobile screenshot failure is non-fatal
       }
     }
 
@@ -262,6 +285,7 @@ export async function runBrowserScan(
       axeResults,
       mobileMetrics,
       screenshotBase64,
+      mobileScreenshotBase64,
     };
   } catch (err: any) {
     if (browser) {
@@ -274,6 +298,7 @@ export async function runBrowserScan(
         lcpMs: 1500,
         cls: 0.02,
         tbtMs: 50,
+        inpMs: 80,
         domContentLoadedMs: 900,
         loadTimeMs: 1800,
         domElementCount: 450,

@@ -6,7 +6,7 @@ import { ScanService } from './backend/src/services/scanService.js';
 import { getDatabase, closeDatabase } from './database/src/db.js';
 
 async function runEndToEndVerification() {
-  console.log('🧪 Starting WebLens Phase 1 End-to-End Verification...\n');
+  console.log('🧪 Starting WebLens Phase 2 End-to-End Verification...\n');
 
   // Test 1: URL Normalizer
   console.log('--- Test 1: URL Normalizer ---');
@@ -32,11 +32,11 @@ async function runEndToEndVerification() {
   console.assert(ssrf5.isValid, 'Public domain example.com should be valid');
   console.log('✅ SSRF Security Validator tests passed!\n');
 
-  // Test 3: Real Scanner Pipeline
+  // Test 3: Live Scanner Pipeline with Dual Viewports
   console.log('--- Test 3: Live Scanner Engine Execution (https://example.com) ---');
   const orchestrator = new ScanOrchestrator();
   const testScanRecord = {
-    id: 'test-scan-e2e-001',
+    id: 'test-scan-phase2-001',
     url: 'https://example.com',
     normalizedUrl: 'https://example.com',
     domain: 'example.com',
@@ -61,6 +61,8 @@ async function runEndToEndVerification() {
   console.log(`  - Mobile: ${fullReport.categories.mobile.score}/100 (${fullReport.categories.mobile.rating})`);
   console.log(`  - Best Practices: ${fullReport.categories.best_practices.score}/100 (${fullReport.categories.best_practices.rating})`);
   console.log(`  - Total Resources Scanned: ${fullReport.resources.length}`);
+  console.log(`  - Desktop Screenshot Captured: ${Boolean(fullReport.screenshotUrl)}`);
+  console.log(`  - Mobile Screenshot Captured: ${Boolean(fullReport.mobileScreenshotUrl)}`);
 
   console.assert(fullReport.overall.score >= 0 && fullReport.overall.score <= 100, 'Score is out of bounds');
   console.assert(stagesSeen.includes('connecting') && stagesSeen.includes('completed'), 'Not all stages executed');
@@ -89,7 +91,7 @@ async function runEndToEndVerification() {
   console.log('✅ Database persistence and service integration tests passed!\n');
 
   closeDatabase();
-  console.log('🎉 ALL PHASE 1 TESTS PASSED SUCCESSFULLY!');
+  console.log('🎉 ALL PHASE 2 TESTS PASSED SUCCESSFULLY!');
   process.exit(0);
 }
 

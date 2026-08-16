@@ -138,6 +138,7 @@ export class ScanOrchestrator extends EventEmitter {
           stage: 'completed',
           progress: 100,
           screenshotUrl: browserData?.screenshotBase64 || null,
+          mobileScreenshotUrl: browserData?.mobileScreenshotBase64 || null,
           completedAt: new Date().toISOString()
         },
         overall,
@@ -181,7 +182,8 @@ export class ScanOrchestrator extends EventEmitter {
         },
         resources,
         resourceBreakdown,
-        screenshotUrl: browserData?.screenshotBase64 || null
+        screenshotUrl: browserData?.screenshotBase64 || null,
+        mobileScreenshotUrl: browserData?.mobileScreenshotBase64 || null
       };
 
       return fullReport;

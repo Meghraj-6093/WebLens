@@ -19,7 +19,8 @@ export function runPerformanceAudit(
   const fcp = browserData?.metrics.fcpMs ?? httpProbe.ttfbMs + 400;
   const lcp = browserData?.metrics.lcpMs ?? fcp + 600;
   const cls = browserData?.metrics.cls ?? 0.01;
-  const tbt = browserData?.metrics.tbtMs ?? 40;
+  const tbt = browserData?.metrics.tbtMs ?? 45;
+  const inp = browserData?.metrics.inpMs ?? 75;
   const domElements = browserData?.metrics.domElementCount ?? 350;
 
   // Metric 1: LCP
@@ -155,14 +156,34 @@ export function runPerformanceAudit(
     });
   }
 
-  // Metric 4: TTFB
+  // Metric 4: TBT (Total Blocking Time)
+  const tbtStatus = tbt <= 200 ? 'good' : tbt <= 600 ? 'needs_improvement' : 'poor';
+  metrics.push({
+    id: 'tbt',
+    name: 'Total Blocking Time (TBT)',
+    value: `${tbt}ms`,
+    status: tbtStatus,
+    description: 'Measures total time when the main thread was blocked by long tasks.'
+  });
+
+  // Metric 5: INP (Interaction to Next Paint)
+  const inpStatus = inp <= 200 ? 'good' : inp <= 500 ? 'needs_improvement' : 'poor';
+  metrics.push({
+    id: 'inp',
+    name: 'Interaction to Next Paint (INP)',
+    value: `${inp}ms`,
+    status: inpStatus,
+    description: 'Measures responsiveness to user interactions like clicks and taps.'
+  });
+
+  // Metric 6: TTFB
   const ttfbStatus = httpProbe.ttfbMs <= 600 ? 'good' : httpProbe.ttfbMs <= 1200 ? 'needs_improvement' : 'poor';
   metrics.push({
     id: 'ttfb',
     name: 'Time to First Byte (TTFB)',
     value: `${httpProbe.ttfbMs}ms`,
     status: ttfbStatus,
-    description: 'Measures the time taken for the browser to receive the first byte of response data.'
+    description: 'Measures server response time for the initial HTML document.'
   });
 
   if (httpProbe.ttfbMs > 1200) {

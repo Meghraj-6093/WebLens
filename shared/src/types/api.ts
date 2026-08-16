@@ -39,6 +39,7 @@ export interface FullScanReport {
   resources: ResourceRecord[];
   resourceBreakdown: ResourceBreakdown;
   screenshotUrl?: string | null;
+  mobileScreenshotUrl?: string | null;
 }
 
 export interface ShareReportResponse {

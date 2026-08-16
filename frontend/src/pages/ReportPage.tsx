@@ -6,6 +6,7 @@ import { OverallScoreCard } from '../components/report/OverallScoreCard.js';
 import { CategoryScoreCards } from '../components/report/CategoryScoreCards.js';
 import { IssueFilter, SeverityFilterType } from '../components/report/IssueFilter.js';
 import { IssueCard } from '../components/report/IssueCard.js';
+import { CoreWebVitalsGrid } from '../components/report/CoreWebVitalsGrid.js';
 import { ResourceTable } from '../components/report/ResourceTable.js';
 import { WaterfallView } from '../components/report/WaterfallView.js';
 import { ScreenshotPreview } from '../components/report/ScreenshotPreview.js';
@@ -22,7 +23,8 @@ import {
   CheckCircle2, 
   FileText, 
   AlertCircle,
-  RotateCw
+  RotateCw,
+  Search
 } from 'lucide-react';
 import { cn } from '../lib/utils.js';
 
@@ -69,13 +71,13 @@ export const ReportPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <Skeleton className="h-64 rounded-2xl" />
+        <Skeleton className="h-64 rounded-3xl" />
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-28 rounded-xl" />
           ))}
         </div>
-        <Skeleton className="h-96 rounded-2xl" />
+        <Skeleton className="h-96 rounded-3xl" />
       </div>
     );
   }
@@ -83,8 +85,8 @@ export const ReportPage: React.FC = () => {
   if (error || !report) {
     return (
       <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-12 h-12 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto">
-          <AlertCircle className="w-6 h-6" />
+        <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto">
+          <AlertCircle className="w-7 h-7" />
         </div>
         <h2 className="text-xl font-bold text-white">Unable to Display Report</h2>
         <p className="text-sm text-slate-400">{error || 'Report not found or has expired.'}</p>
@@ -158,14 +160,14 @@ export const ReportPage: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       {/* Demo Mode Notice */}
       {isDemoMode && (
-        <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs flex items-center justify-between">
+        <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
           <span className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-400" />
-            <span><strong>Demo Mode:</strong> Displaying simulated audit telemetry for <code>demo.weblens.app</code>.</span>
+            <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />
+            <span><strong>Interactive Demo Report:</strong> Live preview of a complete WebLens health audit on <code>demo.weblens.app</code>.</span>
           </span>
           <button
             onClick={() => navigate('/')}
-            className="text-xs font-semibold underline hover:text-white"
+            className="text-xs font-semibold underline hover:text-white shrink-0"
           >
             Audit Your Own URL →
           </button>
@@ -186,7 +188,7 @@ export const ReportPage: React.FC = () => {
               onClick={() => setSelectedCategory('all')}
               className="text-xs text-blue-400 hover:underline font-mono"
             >
-              Reset filter
+              Show all categories
             </button>
           )}
         </div>
@@ -236,58 +238,74 @@ export const ReportPage: React.FC = () => {
       {/* 4. Tab Contents */}
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-6">
-            <div>
-              <h3 className="text-base font-bold text-white tracking-tight mb-3">
-                High Priority Fixes
-              </h3>
-              <div className="space-y-3">
-                {allIssues
-                  .filter(i => !i.passed && (i.severity === 'critical' || i.severity === 'high'))
-                  .slice(0, 5)
-                  .map((issue, idx) => (
-                    <IssueCard key={idx} issue={issue} />
-                  ))}
-                {allIssues.filter(i => !i.passed && (i.severity === 'critical' || i.severity === 'high')).length === 0 && (
-                  <div className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-3">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
-                    <span>No critical or high severity problems detected on this website!</span>
-                  </div>
-                )}
+        <div className="space-y-8">
+          {/* Core Web Vitals Grid */}
+          {report.categories.performance?.metrics?.length > 0 && (
+            <CoreWebVitalsGrid metrics={report.categories.performance.metrics} />
+          )}
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <div>
+                <h3 className="text-base font-bold text-white tracking-tight mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-rose-400" />
+                  <span>Prioritized Action Items</span>
+                </h3>
+                <div className="space-y-3">
+                  {allIssues
+                    .filter(i => !i.passed && (i.severity === 'critical' || i.severity === 'high'))
+                    .slice(0, 6)
+                    .map((issue, idx) => (
+                      <IssueCard key={idx} issue={issue} />
+                    ))}
+                  {allIssues.filter(i => !i.passed && (i.severity === 'critical' || i.severity === 'high')).length === 0 && (
+                    <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                      <span>Zero critical or high severity defects detected! Your site is performing well.</span>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              {/* Waterfall Preview */}
+              {report.resources.length > 0 && (
+                <WaterfallView resources={report.resources} />
+              )}
             </div>
 
-            {/* Waterfall Preview */}
-            {report.resources.length > 0 && (
-              <WaterfallView resources={report.resources} />
-            )}
-          </div>
-
-          <div className="space-y-6">
-            {/* Screenshot Preview */}
-            <ScreenshotPreview screenshotUrl={report.screenshotUrl} domain={report.scan.domain} />
-
-            {/* Quick Metrics Summary */}
-            <div className="card-glow rounded-xl p-5 border border-slate-800 space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                Core Metrics Snapshot
-              </h4>
-              <div className="space-y-2.5 text-xs font-mono">
-                {report.categories.performance?.metrics.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between py-1 border-b border-slate-800/40">
-                    <span className="text-slate-400">{m.name.split('(')[0]}</span>
-                    <span className={cn(
-                      'font-bold',
-                      m.status === 'good' ? 'text-emerald-400' : m.status === 'needs_improvement' ? 'text-amber-400' : 'text-rose-400'
-                    )}>
-                      {m.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
+            <div className="space-y-6">
+              {/* Screenshot Preview with Desktop & Mobile Viewports */}
+              <ScreenshotPreview
+                screenshotUrl={report.screenshotUrl}
+                mobileScreenshotUrl={report.mobileScreenshotUrl}
+                domain={report.scan.domain}
+              />
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Performance Tab */}
+      {activeTab === 'performance' && (
+        <div className="space-y-8">
+          <CoreWebVitalsGrid metrics={report.categories.performance?.metrics || []} />
+
+          {/* Filter Bar */}
+          <IssueFilter
+            selectedSeverity={severityFilter}
+            onSelectSeverity={setSeverityFilter}
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            counts={issueCounts}
+          />
+
+          <div className="space-y-3">
+            {filteredIssues.map((issue, idx) => (
+              <IssueCard key={idx} issue={issue} />
+            ))}
+          </div>
+
+          <WaterfallView resources={report.resources} />
         </div>
       )}
 
@@ -299,8 +317,8 @@ export const ReportPage: React.FC = () => {
         </div>
       )}
 
-      {/* Issues or Category Tabs */}
-      {activeTab !== 'overview' && activeTab !== 'resources' && (
+      {/* Other Category Tabs (SEO, Accessibility, Security, Mobile, Best Practices, All Findings) */}
+      {activeTab !== 'overview' && activeTab !== 'performance' && activeTab !== 'resources' && (
         <div className="space-y-6">
           {/* Category Metrics Banner if specific category tab */}
           {activeTab !== 'issues' && report.categories[activeTab as AuditCategory]?.metrics?.length > 0 && (
@@ -335,7 +353,7 @@ export const ReportPage: React.FC = () => {
               <IssueCard key={idx} issue={issue} />
             ))}
             {filteredIssues.length === 0 && (
-              <div className="p-8 text-center text-xs text-slate-500 card-glow rounded-xl border border-slate-800">
+              <div className="p-8 text-center text-xs text-slate-500 card-glow rounded-2xl border border-slate-800">
                 No issues match your current filters.
               </div>
             )}

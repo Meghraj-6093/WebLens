@@ -30,6 +30,7 @@ export interface ScanRecord {
   stage?: ScanStage;
   progress?: number;
   screenshotUrl?: string | null;
+  mobileScreenshotUrl?: string | null;
   errorMessage?: string | null;
   startedAt: string;
   completedAt?: string | null;
