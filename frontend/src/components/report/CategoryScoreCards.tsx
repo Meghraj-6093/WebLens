@@ -7,8 +7,8 @@ import {
   ShieldCheck, 
   Smartphone, 
   CheckCircle2, 
-  AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  Calculator
 } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 
@@ -16,6 +16,7 @@ export interface CategoryScoreCardsProps {
   report: FullScanReport;
   selectedCategory?: AuditCategory | 'all';
   onSelectCategory: (cat: AuditCategory | 'all') => void;
+  onOpenBreakdown?: (cat: AuditCategory) => void;
 }
 
 interface CategoryCardMeta {
@@ -38,6 +39,7 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
   report,
   selectedCategory = 'all',
   onSelectCategory,
+  onOpenBreakdown,
 }) => {
   const getScoreColor = (score: number) => {
     if (score >= 90) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
@@ -60,7 +62,7 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
             key={meta.key}
             onClick={() => onSelectCategory(isSelected ? 'all' : meta.key)}
             className={cn(
-              'p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group',
+              'p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative',
               isSelected
                 ? 'bg-blue-950/40 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
                 : 'card-glow border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/80'
@@ -89,7 +91,21 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
 
             <div className="mt-3.5 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
               <span>{failedCount === 0 ? 'All passed' : `${failedCount} issue${failedCount > 1 ? 's' : ''}`}</span>
-              <ChevronRight className={cn('w-3.5 h-3.5 transition-transform text-slate-500', isSelected && 'rotate-90 text-blue-400')} />
+              {onOpenBreakdown ? (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenBreakdown(meta.key);
+                  }}
+                  className="p-1 text-slate-500 hover:text-blue-400 rounded transition"
+                  title={`View ${meta.title} score deductions`}
+                >
+                  <Calculator className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <ChevronRight className={cn('w-3.5 h-3.5 transition-transform text-slate-500', isSelected && 'rotate-90 text-blue-400')} />
+              )}
             </div>
           </div>
         );

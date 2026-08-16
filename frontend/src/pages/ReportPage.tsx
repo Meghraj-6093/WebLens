@@ -12,6 +12,7 @@ import { WaterfallView } from '../components/report/WaterfallView.js';
 import { ScreenshotPreview } from '../components/report/ScreenshotPreview.js';
 import { Skeleton } from '../components/ui/Skeleton.js';
 import { Button } from '../components/ui/Button.js';
+import { ScoreBreakdownModal } from '../components/report/ScoreBreakdownModal.js';
 import { 
   Layers, 
   ListOrdered, 
@@ -24,7 +25,8 @@ import {
   FileText, 
   AlertCircle,
   RotateCw,
-  Search
+  Search,
+  Calculator
 } from 'lucide-react';
 import { cn } from '../lib/utils.js';
 
@@ -45,6 +47,8 @@ export const ReportPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<AuditCategory | 'all'>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilterType>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isBreakdownModalOpen, setIsBreakdownModalOpen] = useState(false);
+  const [breakdownModalCategory, setBreakdownModalCategory] = useState<AuditCategory | 'overall'>('overall');
 
   const loadReport = async () => {
     setIsLoading(true);
@@ -203,8 +207,20 @@ export const ReportPage: React.FC = () => {
               setActiveTab('overview');
             }
           }}
+          onOpenBreakdown={(cat) => {
+            setBreakdownModalCategory(cat);
+            setIsBreakdownModalOpen(true);
+          }}
         />
       </div>
+
+      {/* Score Breakdown Modal */}
+      <ScoreBreakdownModal
+        report={report}
+        isOpen={isBreakdownModalOpen}
+        onClose={() => setIsBreakdownModalOpen(false)}
+        initialCategory={breakdownModalCategory}
+      />
 
       {/* 3. Tab Navigation Bar */}
       <div className="border-b border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-px">
