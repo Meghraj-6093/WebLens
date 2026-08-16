@@ -115,8 +115,14 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     [animationTime, colors, particleCount, particleDistances, particleR, timeVariance]
   );
 
-  const updateEffectPosition = useCallback((element: HTMLElement) => {
+  const updateEffectPosition = useCallback((element: HTMLElement | null) => {
     if (!containerRef.current || !filterRef.current || !textRef.current) return;
+    if (!element) {
+      filterRef.current.style.opacity = '0';
+      textRef.current.style.opacity = '0';
+      textRef.current.classList.remove('active');
+      return;
+    }
     const containerRect = containerRef.current.getBoundingClientRect();
     const pos = element.getBoundingClientRect();
 
@@ -124,7 +130,8 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
       left: `${pos.x - containerRect.x}px`,
       top: `${pos.y - containerRect.y}px`,
       width: `${pos.width}px`,
-      height: `${pos.height}px`
+      height: `${pos.height}px`,
+      opacity: '1'
     };
 
     Object.assign(filterRef.current.style, styles);
@@ -180,17 +187,17 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
   useEffect(() => {
     if (!navRef.current || !containerRef.current) return;
     const itemsList = navRef.current.querySelectorAll('li');
-    const activeLi = itemsList[activeIndex] as HTMLElement | undefined;
+    const activeLi = activeIndex >= 0 && activeIndex < itemsList.length ? (itemsList[activeIndex] as HTMLElement) : null;
     if (activeLi) {
       updateEffectPosition(activeLi);
       textRef.current?.classList.add('active');
+    } else {
+      updateEffectPosition(null);
     }
 
     const resizeObserver = new ResizeObserver(() => {
-      const currentActiveLi = navRef.current?.querySelectorAll('li')[activeIndex] as HTMLElement | undefined;
-      if (currentActiveLi) {
-        updateEffectPosition(currentActiveLi);
-      }
+      const currentActiveLi = activeIndex >= 0 && activeIndex < itemsList.length ? (navRef.current?.querySelectorAll('li')[activeIndex] as HTMLElement) : null;
+      updateEffectPosition(currentActiveLi);
     });
 
     resizeObserver.observe(containerRef.current);
