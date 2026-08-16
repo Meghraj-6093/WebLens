@@ -1,0 +1,30 @@
+{
+  "name": "weblens-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WebLens — Instant website health scanner and audit platform",
+  "workspaces": [
+    "shared",
+    "database",
+    "scanner",
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "dev:backend": "npm run dev --workspace=@weblens/backend",
+    "dev:frontend": "npm run dev --workspace=@weblens/frontend",
+    "dev": "npm run dev:backend",
+    "start": "node backend/dist/server.js",
+    "test": "npx tsx test-e2e.ts"
+  },
+  "keywords": [
+    "website-auditor",
+    "lighthouse",
+    "seo",
+    "accessibility",
+    "security-audit"
+  ],
+  "author": "WebLens Team",
+  "license": "MIT"
+}

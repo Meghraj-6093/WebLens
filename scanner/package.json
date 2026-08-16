@@ -1,0 +1,21 @@
+{
+  "name": "@weblens/scanner",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@weblens/shared": "file:../shared",
+    "axe-core": "^4.9.1",
+    "cheerio": "^1.0.0",
+    "ipaddr.js": "^2.2.0",
+    "playwright": "^1.44.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.12",
+    "typescript": "^5.4.5"
+  }
+}
