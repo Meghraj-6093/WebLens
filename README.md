@@ -21,8 +21,8 @@
 - [Why WebLens?](#why-weblens)
 - [Key Features](#key-features)
 - [Audit Engines](#audit-engines)
-- [Deterministic Scoring](#deterministic-scoring)
-- [Architecture](#architecture)
+- [Deterministic Scoring System](#deterministic-scoring-system)
+- [Architecture & Storage Model](#architecture--storage-model)
 - [Security & SSRF Hardening](#security--ssrf-hardening)
 - [Local-First Privacy Architecture](#local-first-privacy-architecture)
 - [Tech Stack](#tech-stack)
@@ -42,50 +42,50 @@
 
 ## Overview
 
-**WebLens** is an open-source technical website intelligence and diagnostic platform. It turns any public URL into an actionable, prioritized health audit across **six essential web quality dimensions**:
+**WebLens** is an open-source technical website intelligence and diagnostic platform. It turns any public URL into an actionable, prioritized health audit across **six core web quality dimensions**:
 
-1. **Performance** (Core Web Vitals: LCP, FCP, CLS, TTFB, resource weight)
-2. **SEO** (Title structure, meta tags, Open Graph, canonicals, robots directives)
-3. **Accessibility** (WCAG 2.1 compliance via `axe-core`, ARIA roles, color contrast, semantic hierarchy)
+1. **Performance** (Core Web Vitals: LCP, FCP, CLS, TTFB, resource waterfall breakdown)
+2. **SEO** (Title hierarchy, meta tags, Open Graph, canonicals, robots directives)
+3. **Accessibility** (WCAG 2.1 Level AA compliance via `axe-core`, ARIA roles, color contrast, semantic hierarchy)
 4. **Security** (TLS posture, CSP, HSTS, `X-Content-Type-Options`, `X-Frame-Options`, cookie attributes)
-5. **Mobile Readiness** (Responsive viewport metadata, horizontal overflow, touch target spacing)
-6. **Best Practices** (HTML5 standards, console diagnostics, doctype compliance, resource delivery)
+5. **Mobile Readiness** (Responsive viewport metadata, horizontal layout overflow, touch target dimensions)
+6. **Best Practices** (HTML5 doctype standards, console diagnostics, encoding, resource delivery)
 
-WebLens couples real browser execution (**Playwright**) with a **Local-First client storage engine (IndexedDB)**, allowing developers, agencies, and site owners to audit, track regressions, and benchmark competitors with zero tracking cookies and zero mandatory accounts.
+WebLens couples real headless browser execution (**Playwright**) with a **Local-First client storage engine (IndexedDB)**. Users can audit websites, organize workspaces, monitor regressions, and benchmark competitors with **zero mandatory accounts**, zero tracking cookies, and private client-side persistence.
 
 ---
 
 ## Why WebLens?
 
-Most website health tools suffer from fragmented workflows, opaque scoring, or invasive third-party telemetry:
+Most website health tools suffer from fragmented workflows, opaque scoring, or invasive third-party tracking:
 
-* **Unified Observability:** Instead of juggling Google PageSpeed, Lighthouse, SEO checkers, and security header analyzers, WebLens executes all audits simultaneously in one automated pipeline.
-* **Deterministic & Transparent Scoring:** Every point deduction is tied to specific rules, impact weights, and actionable code snippets.
-* **SSRF-Hardened Scanner:** Built with multi-layer network validation blocking loopbacks (`127.0.0.1`, `::1`), private subnets (`RFC 1918`), and cloud metadata services (`169.254.169.254`, `100.100.100.200`, `fd00:ec2::...`).
-* **Local-First Privacy:** All audit history, workspaces, competitor matrices, and custom client branding persist client-side in the browser's IndexedDB. Your scan history is never locked behind third-party database silos.
-* **Apple Liquid Glass Interface:** A fluid design system featuring translucent glass refraction, dynamic GooeyNav active islands, and adaptive dark mode contrast.
+* **Unified Diagnostic Pipeline:** Instead of switching between Google PageSpeed, Lighthouse, SEO checkers, and security header analyzers, WebLens executes all analytical checks in a single orchestrated pass.
+* **Transparent & Deterministic Scoring:** Every point deduction is explicitly linked to an audited rule, impact severity, and actionable remediation instructions.
+* **SSRF-Hardened Scanner Engine:** Built with defensive network filtering that actively blocks loopbacks (`127.0.0.1`, `::1`), private subnets (`RFC 1918`), restricted service ports, and cloud provider metadata endpoints (`169.254.169.254`, `100.100.100.200`, `fd00:ec2::...`).
+* **Local-First Privacy by Default:** All scan reports, projects, monitor schedules, competitor benchmark matrices, and custom agency branding persist directly in your browser's IndexedDB. Your diagnostic history stays on your machine.
+* **Liquid Glass-Inspired Interface:** Designed with a tactile aesthetic utilizing Obsidian (`#080A0E`), Warm White (`#F3F0E8`), and Signal Orange (`#FF6B35`) with background refraction, inner reflection bevels, and interactive GooeyNav active islands.
 
 ---
 
 ## Key Features
 
 ### 🔍 Comprehensive Website Auditing
-Enter any normalized URL to launch a 10-stage headless browser audit. View live progress through each analytical phase without fake loader delays.
+Enter any normalized URL to trigger a 10-stage headless browser audit. Live progress updates reflect real analytical phases (connecting, fetching, performance, SEO, accessibility, security, mobile, best practices, scoring, and report generation).
 
 ### ⚡ Core Web Vitals & Resource Waterfall
-Measures real lab metrics including Largest Contentful Paint (LCP), First Contentful Paint (FCP), Cumulative Layout Shift (CLS), and Time to First Byte (TTFB). Generates a complete resource waterfall broken down by scripts, stylesheets, documents, images, and fonts.
+Measures real lab metrics including Largest Contentful Paint (LCP), First Contentful Paint (FCP), Cumulative Layout Shift (CLS), and Time to First Byte (TTFB). Breaks down all network requests into a visual resource waterfall by document, script, stylesheet, image, font, and media types.
 
-### ♿ WCAG Accessibility Verification
-Executes standard `axe-core` rule engines against rendered DOM elements to catch missing form labels, invalid ARIA attributes, missing image alternative text, and contrast failures.
+### ♿ WCAG 2.1 Accessibility Verification
+Executes standard `axe-core` rule engines against rendered DOM elements to identify missing form labels, invalid ARIA attributes, missing image alternative text, and contrast failures.
 
 ### 🛡️ Security Header & Posture Inspection
-Validates defensive HTTP response headers (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`) and flags insecure mixed-content or unencrypted protocols.
+Evaluates defensive HTTP response headers (`Content-Security-Policy`, `Strict-Transport-Security`, `X-Frame-Options`, `X-Content-Type-Options`, `Referrer-Policy`) and flags unencrypted connections or mixed-content risks.
 
 ### 📈 Historical Regression & Compare Diffs
-Compare two audit checkpoints side-by-side. View category score deltas, newly introduced regression issues, and resolved bugs.
+Compare two audit checkpoints side-by-side. Inspect category score deltas, newly introduced regression issues, and resolved bugs.
 
-### ⚔️ Multi-Domain Competitor Benchmark
-Benchmark up to three direct competitor domains simultaneously across Core Web Vitals, SEO structure, and security postures.
+### ⚔️ Multi-Domain Competitor Benchmark Matrix
+Benchmark up to three direct competitor domains simultaneously across Core Web Vitals, SEO structure, and security posture.
 
 ### 🏢 Agency & White-Label Studio
 Customize client audit reports with custom agency branding, primary theme colors, bespoke footer notices, and client domains.
@@ -101,7 +101,7 @@ WebLens organizes checks into six specialized scanning engines:
 
 | Engine | Primary Evaluations |
 | :--- | :--- |
-| **Performance (25%)** | TTFB, First Contentful Paint, Largest Contentful Paint, Cumulative Layout Shift, resource sizes, compression (`gzip`/`brotli`), caching headers. |
+| **Performance (25%)** | TTFB, First Contentful Paint, Largest Contentful Paint, Cumulative Layout Shift, resource weight, compression (`gzip`/`brotli`), caching headers. |
 | **SEO (20%)** | `<title>` length/presence, meta description, canonical URL, robots meta tags, heading hierarchy (`<h1>`-`<h6>`), Open Graph tags, Twitter/X cards. |
 | **Accessibility (20%)** | `axe-core` WCAG 2.1 Level AA checks, image `alt` attributes, button accessible names, form `<label>` associations, landmark elements. |
 | **Security (15%)** | HTTPS enforcement, TLS availability, `HSTS`, `Content-Security-Policy`, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`. |
@@ -110,7 +110,7 @@ WebLens organizes checks into six specialized scanning engines:
 
 ---
 
-## Deterministic Scoring
+## Deterministic Scoring System
 
 The overall health score (0–100) is calculated via a transparent weighted formula:
 
@@ -132,17 +132,19 @@ Each category begins at **100 points**. When an audit rule fails, points are ded
 
 ---
 
-## Architecture
+## Architecture & Storage Model
+
+WebLens uses a **hybrid Local-First architecture** separating browser-local workspace data from server-side headless scan processing.
 
 ```text
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                           WEBLENS FRONTEND                              │
-│  React 18 • TypeScript • Tailwind CSS • Apple Liquid Glass Navigation   │
+│  React 18 • TypeScript • Tailwind CSS • Liquid Glass Navigation         │
 │                                                                         │
 │   ┌─────────────────────────────────────────────────────────────────┐   │
 │   │                 Local Workspace (IndexedDB)                     │   │
 │   │  • Scans & Reports     • Project Workspaces   • Competitors     │   │
-│   │  • Scheduled Monitors  • Agency Settings      • Activity Log    │   │
+│   │  • Scheduled Monitors  • Agency Settings      • Activity Stream │   │
 │   └─────────────────────────────────────────────────────────────────┘   │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │ HTTP / REST
@@ -150,6 +152,7 @@ Each category begins at **100 points**. When an audit rule fails, points are ded
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                        WEBLENS BACKEND API                              │
 │  Express 4 • Concurrency Queue Semaphore • Security Headers • REST v1   │
+│  Optional SQLite server storage for scan job caching and report sharing │
 └────────────────────────────────────┬────────────────────────────────────┘
                                      │
                                      ▼
@@ -158,9 +161,9 @@ Each category begins at **100 points**. When an audit rule fails, points are ded
 │                                                                         │
 │   ┌───────────────────────┐         ┌───────────────────────────────┐   │
 │   │ SSRF & DNS Protection │         │ Playwright Headless Browser   │   │
-│   │ • IPv4/IPv6 Unmapping │         │ • Core Web Vitals & Screenshots│  │
+│   │ • IPv4/IPv6 Unmapping │         │ • Core Web Vitals & Snapshots │   │
 │   │ • Cloud Metadata Block│         │ • Network Resource Waterfall  │   │
-│   │ • Restricted Ports    │         │ • axe-core WCAG Accessibility │   │
+│   │ • Restricted Web Ports│         │ • axe-core WCAG Accessibility │   │
 │   └───────────────────────┘         └───────────────────────────────┘   │
 │                                                                         │
 │   ┌─────────────────────────────────────────────────────────────────┐   │
@@ -174,11 +177,18 @@ Each category begins at **100 points**. When an audit rule fails, points are ded
 └─────────────────────────────────────────────────────────────────────────┘
 ```
 
+### Storage Boundary Separation
+
+| Storage Layer | Location | What It Stores |
+| :--- | :--- | :--- |
+| **IndexedDB (`weblens_local_workspace`)** | Client Browser | User workspaces, saved scan reports, custom project folders, continuous monitor schedules, competitor matrices, white-label settings, and activity history. |
+| **SQLite (`weblens.db`)** | Backend Server | Ephemeral scan worker queue states, completed scan records, and shareable public audit tokens. |
+
 ---
 
 ## Security & SSRF Hardening
 
-Arbitrary website scanners face severe SSRF (Server-Side Request Forgery) risks. WebLens implements strict defensive guardrails in [`scanner/src/engine/ssrf.ts`](scanner/src/engine/ssrf.ts):
+Arbitrary website scanners face SSRF (Server-Side Request Forgery) risks. WebLens implements defensive guardrails in [`scanner/src/engine/ssrf.ts`](scanner/src/engine/ssrf.ts):
 
 1. **Protocol Restriction:** Only `http:` and `https:` schemes are accepted (rejects `file:`, `javascript:`, `data:`, `gopher:`).
 2. **Port Whitelisting:** Restricts outbound connections to standard web ports (`80`, `443`, `8080`, `8443`). Blocks internal database and administrative ports (e.g., `22`, `6379`, `5432`, `27017`).
@@ -195,7 +205,7 @@ Arbitrary website scanners face severe SSRF (Server-Side Request Forgery) risks.
 
 ## Local-First Privacy Architecture
 
-WebLens stores your diagnostic workspaces directly in your browser using **IndexedDB** (`weblens_local_workspace`):
+WebLens manages your workspaces client-side using **IndexedDB** (`weblens_local_workspace`):
 
 ```text
 weblens_local_workspace (IndexedDB)
@@ -209,8 +219,8 @@ weblens_local_workspace (IndexedDB)
 └── settings       (Workstation preferences)
 ```
 
-* **Zero Mandatory Logins:** Launch and audit websites immediately.
-* **Full Data Export & Backup:** Export your entire local workspace to JSON or restore from a previous backup file at any time.
+* **Zero Required Accounts:** Audit and organize websites immediately without login walls.
+* **Full Data Export & Backup:** Export your complete local workspace to JSON or restore from a previous backup file at any time from the Local Workspace page.
 
 ---
 
@@ -218,17 +228,17 @@ weblens_local_workspace (IndexedDB)
 
 ### Monorepo Workspaces
 * **`@weblens/shared`** — Shared TypeScript interfaces, audit contracts, and scoring types.
-* **`@weblens/database`** — SQLite repository pattern and schema migrations.
+* **`@weblens/database`** — SQLite repository layer and schema definitions for server persistence.
 * **`@weblens/scanner`** — Headless browser orchestrator, SSRF engine, and scoring rules.
 * **`@weblens/backend`** — Express REST API, security middleware, and background schedulers.
-* **`@weblens/frontend`** — React 18 SPA, Vite build pipeline, and Liquid Glass design system.
+* **`@weblens/frontend`** — React 18 SPA, Vite build pipeline, and Liquid Glass-inspired design system.
 * **`extension`** — Chrome/Chromium browser extension popup.
 
-### Core Libraries
+### Core Libraries & Tools
 * **Frontend:** React 18, React Router 6, Tailwind CSS, Lucide React, Space Grotesk typography.
 * **Backend:** Node.js, Express, `cors`, `dotenv`, `tsx`.
-* **Scanner & Engine:** Playwright, `axe-core`, `cheerio`, `ipaddr.js`.
-* **Database & Storage:** Native `node:sqlite` (backend), `IndexedDB` (frontend).
+* **Scanner:** Playwright, `axe-core`, `cheerio`, `ipaddr.js`.
+* **Data Storage:** Native `node:sqlite` (backend), `IndexedDB` (frontend).
 
 ---
 
@@ -245,7 +255,7 @@ WebLens/
 ├── database/                 # Database Layer
 │   └── src/
 │       ├── db.ts             # SQLite connection management
-│       ├── repository.ts     # Scan & User repository operations
+│       ├── repository.ts     # Scan repository operations
 │       └── schema.sql        # Table definitions & indexes
 ├── docs/                     # Documentation & PRD
 │   └── PRD.md                # Complete Product Requirements Document
@@ -257,7 +267,7 @@ WebLens/
 │   └── src/
 │       ├── components/       # UI, Liquid Glass navbar, report cards
 │       ├── lib/              # IndexedDB client (db.ts) & API client (api.ts)
-│       ├── pages/            # 10 core application routes
+│       ├── pages/            # Application routes
 │       └── index.css         # Liquid Glass refraction & theme tokens
 ├── scanner/                  # Diagnostic Audit Engine
 │   └── src/
@@ -315,9 +325,12 @@ cp .env.example .env
 | :--- | :--- | :--- |
 | `NODE_ENV` | `development` | Runtime environment mode |
 | `PORT` | `3001` | Backend API server port |
+| `HOST` | `0.0.0.0` | Backend API listen address |
 | `DATABASE_PATH` | `./weblens.db` | Local SQLite database filepath |
 | `SCAN_CONCURRENCY_LIMIT` | `3` | Maximum concurrent headless browser workers |
 | `SCAN_TIMEOUT_MS` | `30000` | Headless audit timeout in milliseconds |
+| `CORS_ORIGIN` | `http://localhost:5173` | Allowed CORS origin |
+| `JWT_SECRET` | *(Development secret)* | Secret token for optional signed tokens |
 
 ### Running Locally
 
@@ -356,16 +369,17 @@ WebLens provides a REST API for programmatic audits and integrations.
 ```http
 GET /api/health
 ```
-**Response:**
+
+*(Example response schema)*:
 ```json
 {
   "status": "healthy",
   "version": "1.0.0",
-  "uptimeSeconds": 142,
+  "uptimeSeconds": "<uptime_seconds>",
   "system": {
-    "nodeVersion": "v20.12.2",
-    "memoryRssMb": 198.45,
-    "memoryHeapUsedMb": 74.12
+    "nodeVersion": "v20.x.x",
+    "memoryRssMb": "<memory_rss_mb>",
+    "memoryHeapUsedMb": "<memory_heap_used_mb>"
   },
   "workers": {
     "activeScans": 0,
@@ -388,10 +402,11 @@ Content-Type: application/json
   "url": "https://example.com"
 }
 ```
-**Response:**
+
+*(Example response schema)*:
 ```json
 {
-  "scanId": "scan_c6d59b20_18f2",
+  "scanId": "scan_<unique_id>",
   "status": "queued",
   "url": "https://example.com/",
   "domain": "example.com",
@@ -401,7 +416,7 @@ Content-Type: application/json
 
 ### 3. Retrieve Report Results
 ```http
-GET /api/scans/scan_c6d59b20_18f2/results
+GET /api/scans/:id/results
 ```
 
 ---
@@ -414,21 +429,22 @@ WebLens includes comprehensive automated regression suites:
 # 1. Full E2E & Local-First Suite (7 routes, live scan, IndexedDB validation)
 npm test
 
-# 2. Production Security & Hostile SSRF Evasion Suite
+# 2. Production Security & Hostile SSRF Evasion Suite (21 checks)
 npm run test:security
 
-# 3. Form Input State & Placeholder Verification
+# 3. Form Input State & Placeholder Verification (5 forms)
 npm run test:inputs
 ```
 
 ```text
-Execution Summary:
+Verified Test Capabilities:
   ✔ SSRF Hardening: IPv4-mapped IPv6 loopback blocked
-  ✔ SSRF Hardening: Cloud metadata endpoints (169.254.169.254, 100.100.100.200) blocked
-  ✔ SSRF Hardening: Restricted ports (22, 6379, 5432, 27017) blocked
+  ✔ SSRF Hardening: Cloud metadata endpoints (169.254.169.254, 100.100.100.200, fd00:ec2::254) blocked
+  ✔ SSRF Hardening: Restricted service ports (22, 6379, 5432, 27017) blocked
   ✔ Concurrency Queue: Drained 6 concurrent scans with maxConcurrency=3
   ✔ Security Headers: nosniff, SAMEORIGIN, HSTS validated
   ✔ E2E: 7 application routes & IndexedDB auto-persistence verified
+  ✔ Clean Inputs: All 5 primary form inputs start empty on initial mount
 ```
 
 ---
@@ -444,6 +460,7 @@ Contributions are welcome! To contribute:
    ```bash
    npm run build
    npm run test:security
+   npm run test:inputs
    npm test
    ```
 5. **Push to your Branch:** `git push origin feature/amazing-feature`
