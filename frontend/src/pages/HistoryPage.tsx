@@ -131,7 +131,7 @@ export const HistoryPage: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Filter by domain (e.g. example.com)"
+            placeholder="Filter by domain (e.g. yourwebsite.com)"
             className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl pl-9 pr-3 py-2 text-xs text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35] font-mono"
           />
         </div>

@@ -7,8 +7,8 @@ import { compareCompetitorDomains } from '../lib/api.js';
 import { CompetitorComparisonResult, AuditCategory } from '@weblens/shared';
 
 export const CompetitorPage: React.FC = () => {
-  const [url1, setUrl1] = useState<string>('https://example.com');
-  const [url2, setUrl2] = useState<string>('https://news.ycombinator.com');
+  const [url1, setUrl1] = useState<string>('');
+  const [url2, setUrl2] = useState<string>('');
   const [url3, setUrl3] = useState<string>('');
   
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -31,7 +31,7 @@ export const CompetitorPage: React.FC = () => {
 
   const handleCompare = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!url1 || !url2) return;
+    if (!url1.trim() || !url2.trim()) return;
 
     setIsLoading(true);
     setError(null);
@@ -90,7 +90,7 @@ export const CompetitorPage: React.FC = () => {
             <Input
               value={url1}
               onChange={(e) => setUrl1(e.target.value)}
-              placeholder="https://yourwebsite.com"
+              placeholder="Enter your website URL..."
               required
             />
           </div>
@@ -99,7 +99,7 @@ export const CompetitorPage: React.FC = () => {
             <Input
               value={url2}
               onChange={(e) => setUrl2(e.target.value)}
-              placeholder="https://competitor-a.com"
+              placeholder="Enter competitor URL..."
               required
             />
           </div>
@@ -108,7 +108,7 @@ export const CompetitorPage: React.FC = () => {
             <Input
               value={url3}
               onChange={(e) => setUrl3(e.target.value)}
-              placeholder="https://competitor-b.com"
+              placeholder="Enter second competitor URL (optional)..."
             />
           </div>
         </div>

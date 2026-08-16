@@ -360,7 +360,7 @@ export const AgencyPage: React.FC = () => {
 
               {/* Sample Body */}
               <div className="space-y-2">
-                <div className="text-xs text-[#8E8A82]">Target Website: <span className="text-[#F3F0E8] font-mono">example.com</span></div>
+                <div className="text-xs text-[#8E8A82]">Target Website: <span className="text-[#F3F0E8] font-mono">clientwebsite.com</span></div>
                 <div className="h-2 rounded-full bg-[#151A21] overflow-hidden">
                   <div className="h-full w-[94%]" style={{ backgroundColor: primaryColor }}></div>
                 </div>

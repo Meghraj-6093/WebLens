@@ -245,7 +245,7 @@ export const ProjectsPage: React.FC = () => {
                   required
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
-                  placeholder="example.com"
+                  placeholder="yourwebsite.com"
                   className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl px-3 py-2 text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35] font-mono"
                 />
               </div>

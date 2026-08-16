@@ -163,7 +163,7 @@ export const MonitoringPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className="sm:col-span-2">
                   <Input
-                    placeholder="https://example.com"
+                    placeholder="Enter website URL (e.g. yourwebsite.com)..."
                     value={newUrl}
                     onChange={(e) => setNewUrl(e.target.value)}
                     required
