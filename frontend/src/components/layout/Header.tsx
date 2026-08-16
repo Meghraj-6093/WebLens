@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Activity, 
   HardDrive,
@@ -7,9 +7,11 @@ import {
   X
 } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
+import { GooeyNav, GooeyNavItem } from '../ui/GooeyNav.js';
 
 export const Header: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
 
@@ -21,15 +23,30 @@ export const Header: React.FC = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const navLinks = [
-    { to: '/', label: 'Scanner' },
-    { to: '/dashboard', label: 'Dashboard' },
-    { to: '/monitoring', label: 'Monitoring' },
-    { to: '/competitors', label: 'Competitors' },
-    { to: '/agency', label: 'Agency' },
-    { to: '/developers', label: 'API' },
-    { to: '/profile', label: 'Profile' },
-  ];
+  const navLinks: GooeyNavItem[] = useMemo(
+    () => [
+      { label: 'Scanner', href: '/' },
+      { label: 'Dashboard', href: '/dashboard' },
+      { label: 'Monitoring', href: '/monitoring' },
+      { label: 'Competitors', href: '/competitors' },
+      { label: 'Agency', href: '/agency' },
+      { label: 'API', href: '/developers' },
+      { label: 'Profile', href: '/profile' },
+    ],
+    []
+  );
+
+  const activeIndex = useMemo(() => {
+    const path = location.pathname;
+    if (path === '/') return 0;
+    if (path.startsWith('/dashboard')) return 1;
+    if (path.startsWith('/monitoring')) return 2;
+    if (path.startsWith('/competitor')) return 3;
+    if (path.startsWith('/agency')) return 4;
+    if (path.startsWith('/developer') || path.startsWith('/api')) return 5;
+    if (path.startsWith('/profile') || path.startsWith('/settings') || path.startsWith('/project')) return 6;
+    return 0;
+  }, [location.pathname]);
 
   return (
     <header className="sticky top-3 sm:top-4 z-40 w-full px-3 sm:px-6 lg:px-8 pointer-events-none">
@@ -57,26 +74,20 @@ export const Header: React.FC = () => {
               </span>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const isActive = location.pathname === link.to;
-                return (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className={cn(
-                      'px-3 py-1.5 rounded-xl text-xs font-semibold transition-all duration-150',
-                      isActive
-                        ? 'bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30 shadow-sm shadow-[#FF6B35]/10 font-bold'
-                        : 'text-[#8E8A82] hover:text-[#F3F0E8] hover:bg-[#151A21]'
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-            </nav>
+            {/* Desktop Navigation Links with React Bits GooeyNav */}
+            <div className="hidden lg:flex items-center">
+              <GooeyNav
+                items={navLinks}
+                activeIndex={activeIndex}
+                onNavigate={(item) => navigate(item.href)}
+                particleCount={12}
+                particleDistances={[65, 10]}
+                particleR={75}
+                animationTime={500}
+                timeVariance={150}
+                colors={[1, 1, 1, 2, 2, 3, 1]}
+              />
+            </div>
           </div>
 
           {/* Right: Workspace Status Pill & Mobile Menu Toggle */}
@@ -106,17 +117,17 @@ export const Header: React.FC = () => {
         {/* Mobile / Tablet Floating Drawer Dropdown */}
         {mobileMenuOpen && (
           <div className="lg:hidden mt-2 rounded-2xl border border-[rgba(243,240,232,0.14)] bg-[#0C0F14]/95 p-3 space-y-1.5 backdrop-blur-2xl shadow-2xl shadow-black/80 animate-fade-in pointer-events-auto">
-            {navLinks.map((link) => {
-              const isActive = location.pathname === link.to;
+            {navLinks.map((link, idx) => {
+              const isActive = activeIndex === idx;
               return (
                 <Link
-                  key={link.to}
-                  to={link.to}
+                  key={link.href}
+                  to={link.href}
                   onClick={() => setMobileMenuOpen(false)}
                   className={cn(
                     'block px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all',
                     isActive
-                      ? 'bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30 font-bold'
+                      ? 'bg-[#F3F0E8] text-[#080A0E] font-bold shadow-md shadow-[#FF6B35]/15'
                       : 'text-[#D8D4CA] hover:text-[#F3F0E8] hover:bg-[#151A21]'
                   )}
                 >
@@ -130,3 +141,5 @@ export const Header: React.FC = () => {
     </header>
   );
 };
+
+export default Header;
