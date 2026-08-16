@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 
 async function testGooeyNav() {
-  console.log('--- Starting WebLens GooeyNav Interactive Verification ---');
+  console.log('--- Starting WebLens GooeyNav Perimeter Animation Verification ---');
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
 
@@ -36,21 +36,27 @@ async function testGooeyNav() {
     }
   }
 
-  // 2. Test interactive clicking & gooey transition
-  console.log('\nTesting interactive click transitions & mid-flight capture...');
+  // 2. Test interactive clicking & perimeter transition
+  console.log('\nTesting interactive click transitions & perimeter particle capture...');
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 
-  // Click Competitors and capture mid-flight
+  // Click Competitors and capture perimeter particles
   const competitorsLink = page.locator(`.gooey-nav-container nav a:has-text("Competitors")`);
   await competitorsLink.click();
-  await page.waitForTimeout(80); // mid-flight
+  await page.waitForTimeout(100); // mid-flight
+
+  const particleCountMidflight = await page.evaluate(() => {
+    return document.querySelectorAll('.gooey-perimeter-particle').length;
+  });
+  console.log(`  Perimeter particles active mid-flight: ${particleCountMidflight}`);
+
   const header = page.locator('header');
-  await header.screenshot({ path: 'screenshot_header_gooey_midflight.png' });
-  console.log('  Saved mid-flight screenshot: screenshot_header_gooey_midflight.png');
+  await header.screenshot({ path: 'screenshot_header_gooey_perimeter_midflight.png' });
+  console.log('  Saved mid-flight screenshot: screenshot_header_gooey_perimeter_midflight.png');
 
   await page.waitForTimeout(500); // wait for full settle
-  await header.screenshot({ path: 'screenshot_header_gooey_nav.png' });
-  console.log('  Saved settled screenshot: screenshot_header_gooey_nav.png');
+  await header.screenshot({ path: 'screenshot_header_gooey_perimeter_settled.png' });
+  console.log('  Saved settled screenshot: screenshot_header_gooey_perimeter_settled.png');
 
   // Verify final active state
   const currentActive = await page.evaluate(() => {
@@ -76,7 +82,7 @@ async function testGooeyNav() {
 
   // Verify that all particle DOM elements were completely cleaned up
   const residualParticles = await page.evaluate(() => {
-    return document.querySelectorAll('.gooey-blob-particle').length;
+    return document.querySelectorAll('.gooey-perimeter-particle').length;
   });
   console.log(`  Residual particles in DOM after rapid clicking: ${residualParticles}`);
   if (residualParticles > 0) {
@@ -109,10 +115,10 @@ async function testGooeyNav() {
   await mobilePage.close();
 
   await browser.close();
-  console.log('\n✅ ALL REFINED GOOEYNAV TESTS PASSED WITH 100% SUCCESS!');
+  console.log('\n✅ ALL PERIMETER GOOEYNAV TESTS PASSED WITH 100% SUCCESS!');
 }
 
 testGooeyNav().catch((err) => {
-  console.error('❌ GooeyNav test failed:', err);
+  console.error('❌ Perimeter GooeyNav test failed:', err);
   process.exit(1);
 });
