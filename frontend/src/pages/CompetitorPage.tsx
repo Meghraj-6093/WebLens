@@ -69,24 +69,24 @@ export const CompetitorPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="border-b border-slate-800/80 pb-6">
+      <div className="border-b border-[rgba(243,240,232,0.08)] pb-6">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
+          <div className="w-8 h-8 rounded-xl bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30 flex items-center justify-center">
             <Swords className="w-4 h-4" />
           </div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Competitor Benchmark Matrix</h1>
+          <h1 className="text-2xl font-black text-[#F3F0E8] tracking-tight">Competitor Benchmark Matrix</h1>
         </div>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-[#8E8A82] mt-1">
           Side-by-side comparative analysis of your website against direct competitors across Core Web Vitals, SEO, and Security.
         </p>
       </div>
 
       {/* Input Form */}
-      <form onSubmit={handleCompare} className="card-glow rounded-2xl p-6 border border-slate-800 space-y-4">
-        <h2 className="text-xs font-bold text-slate-300 uppercase tracking-wider">Enter Websites to Benchmark</h2>
+      <form onSubmit={handleCompare} className="card-glow rounded-2xl p-6 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-4">
+        <h2 className="text-xs font-bold text-[#D8D4CA] uppercase tracking-wider">Enter Websites to Benchmark</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label className="text-[11px] font-semibold text-blue-400 mb-1 block">Your Website</label>
+            <label className="text-[11px] font-bold text-[#FF6B35] mb-1 block">Your Website</label>
             <Input
               value={url1}
               onChange={(e) => setUrl1(e.target.value)}
@@ -95,7 +95,7 @@ export const CompetitorPage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-amber-400 mb-1 block">Competitor A</label>
+            <label className="text-[11px] font-bold text-[#FF804F] mb-1 block">Competitor A</label>
             <Input
               value={url2}
               onChange={(e) => setUrl2(e.target.value)}
@@ -104,7 +104,7 @@ export const CompetitorPage: React.FC = () => {
             />
           </div>
           <div>
-            <label className="text-[11px] font-semibold text-purple-400 mb-1 block">Competitor B (Optional)</label>
+            <label className="text-[11px] font-bold text-[#8E8A82] mb-1 block">Competitor B (Optional)</label>
             <Input
               value={url3}
               onChange={(e) => setUrl3(e.target.value)}
@@ -136,23 +136,23 @@ export const CompetitorPage: React.FC = () => {
       {result && (
         <div className="space-y-8 animate-fade-in">
           {/* Winner Banner */}
-          <div className="card-glow rounded-2xl p-6 border border-amber-500/30 bg-gradient-to-r from-amber-500/10 via-slate-900/40 to-blue-500/10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="card-glow rounded-2xl p-6 border border-[#FF6B35]/40 bg-[#11151B] flex flex-col md:flex-row items-center justify-between gap-6">
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-amber-500/20 text-amber-400 flex items-center justify-center border border-amber-500/40">
+              <div className="w-14 h-14 rounded-2xl bg-[#FF6B35]/20 text-[#FF6B35] flex items-center justify-center border border-[#FF6B35]/40">
                 <Trophy className="w-7 h-7" />
               </div>
               <div>
-                <div className="text-xs font-bold text-amber-400 uppercase tracking-wider">Benchmark Winner</div>
-                <div className="text-xl font-black text-white">{result.winnerDomain}</div>
-                <div className="text-xs text-slate-400 mt-0.5">Ranked highest in overall technical health and user experience metrics.</div>
+                <div className="text-xs font-bold text-[#FF6B35] uppercase tracking-wider">Benchmark Winner</div>
+                <div className="text-xl font-black text-[#F3F0E8]">{result.winnerDomain}</div>
+                <div className="text-xs text-[#8E8A82] mt-0.5">Ranked highest in overall technical health and user experience metrics.</div>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
               {result.sites.map((site) => (
-                <div key={site.domain} className="text-center bg-slate-900/80 px-4 py-2 rounded-xl border border-slate-800">
-                  <div className="text-[11px] text-slate-400 font-mono truncate max-w-[100px]">{site.domain}</div>
-                  <div className={`text-lg font-black font-mono ${site.domain === result.winnerDomain ? 'text-amber-400' : 'text-white'}`}>
+                <div key={site.domain} className="text-center bg-[#080A0E] px-4 py-2 rounded-xl border border-[rgba(243,240,232,0.08)]">
+                  <div className="text-[11px] text-[#8E8A82] font-mono truncate max-w-[100px]">{site.domain}</div>
+                  <div className={`text-lg font-black font-mono ${site.domain === result.winnerDomain ? 'text-[#FF6B35]' : 'text-[#F3F0E8]'}`}>
                     {site.overallScore}
                   </div>
                 </div>
@@ -161,28 +161,28 @@ export const CompetitorPage: React.FC = () => {
           </div>
 
           {/* Comparative Category Score Table */}
-          <div className="card-glow rounded-2xl border border-slate-800 overflow-hidden">
+          <div className="card-glow rounded-2xl border border-[rgba(243,240,232,0.08)] bg-[#11151B] overflow-hidden">
             <table className="w-full text-left text-xs">
-              <thead className="bg-slate-900/80 border-b border-slate-800 text-slate-400 font-mono uppercase tracking-wider">
+              <thead className="bg-[#151A21] border-b border-[rgba(243,240,232,0.08)] text-[#8E8A82] font-mono uppercase tracking-wider">
                 <tr>
                   <th className="p-4">Audit Category</th>
                   {result.sites.map((s) => (
                     <th key={s.domain} className="p-4 text-center">
-                      <div className="font-bold text-white text-sm">{s.domain}</div>
-                      <div className="text-[10px] text-slate-500 font-mono lowercase">{s.url}</div>
+                      <div className="font-bold text-[#F3F0E8] text-sm">{s.domain}</div>
+                      <div className="text-[10px] text-[#6E6A63] font-mono lowercase">{s.url}</div>
                     </th>
                   ))}
                   <th className="p-4 text-right">Category Leader</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-[rgba(243,240,232,0.06)]">
                 {categories.map((cat) => {
                   const Icon = cat.icon;
                   const leader = (result.categoryLeaders as any)?.[cat.id];
                   return (
-                    <tr key={cat.id} className="hover:bg-slate-900/30 transition">
-                      <td className="p-4 font-bold text-white flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-blue-400" />
+                    <tr key={cat.id} className="hover:bg-[#151A21]/50 transition">
+                      <td className="p-4 font-bold text-[#F3F0E8] flex items-center gap-2">
+                        <Icon className="w-4 h-4 text-[#FF6B35]" />
                         {cat.label}
                       </td>
                       {result.sites.map((s) => {
@@ -190,13 +190,13 @@ export const CompetitorPage: React.FC = () => {
                         const isLeader = leader?.domain === s.domain;
                         return (
                           <td key={s.domain} className="p-4 text-center">
-                            <span className={`inline-block font-mono font-bold px-2.5 py-1 rounded-lg text-xs ${isLeader ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-black' : 'bg-slate-800 text-slate-300'}`}>
+                            <span className={`inline-block font-mono font-bold px-2.5 py-1 rounded-lg text-xs ${isLeader ? 'bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30 font-black' : 'bg-[#151A21] text-[#D8D4CA]'}`}>
                               {score}/100
                             </span>
                           </td>
                         );
                       })}
-                      <td className="p-4 text-right font-bold text-emerald-400 font-mono">
+                      <td className="p-4 text-right font-bold text-[#FF6B35] font-mono">
                         {leader?.domain} ({leader?.score})
                       </td>
                     </tr>
@@ -207,15 +207,15 @@ export const CompetitorPage: React.FC = () => {
           </div>
 
           {/* Competitive AI Insights */}
-          <div className="card-glow rounded-2xl p-6 border border-slate-800 space-y-3">
-            <div className="flex items-center gap-2 text-xs font-bold text-blue-400 uppercase tracking-wider">
+          <div className="card-glow rounded-2xl p-6 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-3">
+            <div className="flex items-center gap-2 text-xs font-bold text-[#FF6B35] uppercase tracking-wider">
               <Sparkles className="w-4 h-4" />
               <span>Competitive Intelligence Insights</span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {result.insights.map((insight, idx) => (
-                <div key={idx} className="p-3.5 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-300 leading-relaxed">
-                  <span dangerouslySetInnerHTML={{ __html: insight.replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>') }} />
+                <div key={idx} className="p-3.5 rounded-xl bg-[#080A0E] border border-[rgba(243,240,232,0.08)] text-xs text-[#D8D4CA] leading-relaxed">
+                  <span dangerouslySetInnerHTML={{ __html: insight.replace(/\*\*(.*?)\*\*/g, '<strong class="text-[#F3F0E8]">$1</strong>') }} />
                 </div>
               ))}
             </div>
@@ -225,28 +225,28 @@ export const CompetitorPage: React.FC = () => {
 
       {/* Saved Benchmarks History */}
       {savedBenchmarks.length > 0 && (
-        <div className="space-y-4 pt-4 border-t border-slate-800">
-          <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
-            <Clock className="w-4 h-4 text-blue-400" />
+        <div className="space-y-4 pt-4 border-t border-[rgba(243,240,232,0.08)]">
+          <h3 className="text-sm font-bold text-[#F3F0E8] tracking-tight flex items-center gap-2">
+            <Clock className="w-4 h-4 text-[#FF6B35]" />
             <span>Saved Local Benchmarks ({savedBenchmarks.length})</span>
           </h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {savedBenchmarks.map((bench) => (
-              <div key={bench.id} className="card-glow rounded-2xl p-5 border border-slate-800 space-y-3">
+              <div key={bench.id} className="card-glow rounded-2xl p-5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-3">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-white text-xs">Winner: {bench.winnerDomain}</span>
+                  <span className="font-bold text-[#F3F0E8] text-xs">Winner: {bench.winnerDomain}</span>
                   <button
                     onClick={() => handleDeleteSaved(bench.id)}
-                    className="p-1 text-slate-500 hover:text-rose-400 transition"
+                    className="p-1 text-[#8E8A82] hover:text-rose-400 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
                   {bench.sites?.map((s: any) => (
-                    <span key={s.domain} className="px-2 py-1 bg-slate-900 border border-slate-800 rounded-lg text-[11px] font-mono text-slate-300">
-                      {s.domain}: <strong className="text-emerald-400">{s.overallScore}</strong>
+                    <span key={s.domain} className="px-2 py-1 bg-[#151A21] border border-[rgba(243,240,232,0.08)] rounded-lg text-[11px] font-mono text-[#D8D4CA]">
+                      {s.domain}: <strong className="text-[#FF6B35]">{s.overallScore}</strong>
                     </span>
                   ))}
                 </div>

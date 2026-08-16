@@ -8,6 +8,7 @@ export interface ScoreGaugeProps {
   subLabel?: string;
   showRating?: boolean;
   className?: string;
+  forceOrange?: boolean;
 }
 
 export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
@@ -17,43 +18,53 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
   subLabel,
   showRating = true,
   className,
+  forceOrange = true,
 }) => {
   const boundedScore = Math.max(0, Math.min(100, Math.round(score)));
 
   const getColorConfig = (val: number) => {
-    if (val >= 90) {
+    if (forceOrange) {
       return {
-        stroke: '#10B981', // emerald
-        glow: 'rgba(16, 185, 129, 0.25)',
-        text: 'text-emerald-400',
-        rating: 'Excellent',
-        bgTrack: 'rgba(16, 185, 129, 0.1)'
+        stroke: '#FF6B35', // Signal Orange
+        glow: 'rgba(255, 107, 53, 0.25)',
+        text: 'text-[#FF6B35]',
+        rating: val >= 90 ? 'Optimal' : val >= 75 ? 'Good' : val >= 50 ? 'Needs Attention' : 'Critical',
+        bgTrack: 'rgba(243, 240, 232, 0.08)'
       };
     }
-    if (val >= 75) {
+    if (val >= 90) {
       return {
-        stroke: '#3B82F6', // blue
-        glow: 'rgba(59, 130, 246, 0.25)',
-        text: 'text-blue-400',
+        stroke: '#FF6B35',
+        glow: 'rgba(255, 107, 53, 0.25)',
+        text: 'text-[#FF6B35]',
+        rating: 'Optimal',
+        bgTrack: 'rgba(243, 240, 232, 0.08)'
+      };
+    }
+    if (val >= 70) {
+      return {
+        stroke: '#FF804F',
+        glow: 'rgba(255, 128, 79, 0.25)',
+        text: 'text-[#FF804F]',
         rating: 'Good',
-        bgTrack: 'rgba(59, 130, 246, 0.1)'
+        bgTrack: 'rgba(243, 240, 232, 0.08)'
       };
     }
     if (val >= 50) {
       return {
-        stroke: '#F59E0B', // amber
-        glow: 'rgba(245, 158, 11, 0.25)',
-        text: 'text-amber-400',
-        rating: 'Needs Improvement',
-        bgTrack: 'rgba(245, 158, 11, 0.1)'
+        stroke: '#D94F20',
+        glow: 'rgba(217, 79, 32, 0.25)',
+        text: 'text-[#D94F20]',
+        rating: 'Needs Attention',
+        bgTrack: 'rgba(243, 240, 232, 0.08)'
       };
     }
     return {
-      stroke: '#F43F5E', // rose
-      glow: 'rgba(244, 63, 94, 0.25)',
+      stroke: '#EF4444',
+      glow: 'rgba(239, 68, 68, 0.25)',
       text: 'text-rose-400',
-      rating: 'Poor',
-      bgTrack: 'rgba(244, 63, 94, 0.1)'
+      rating: 'Critical',
+      bgTrack: 'rgba(243, 240, 232, 0.08)'
     };
   };
 
@@ -70,7 +81,7 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
       <div className="relative flex items-center justify-center" style={{ width: dimension, height: dimension }}>
         {/* Glow backdrop */}
         <div
-          className="absolute inset-0 rounded-full blur-xl opacity-40 pointer-events-none transition-all duration-500"
+          className="absolute inset-0 rounded-full blur-xl opacity-35 pointer-events-none transition-all duration-500"
           style={{ background: config.glow }}
         />
 
@@ -110,15 +121,14 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className={cn(
-              'font-extrabold font-mono tracking-tight transition-colors duration-300',
-              size === 'sm' ? 'text-lg' : size === 'md' ? 'text-3xl' : 'text-5xl',
-              config.text
+              'font-extrabold font-mono tracking-tight text-[#F3F0E8] transition-colors duration-300',
+              size === 'sm' ? 'text-lg' : size === 'md' ? 'text-3xl' : 'text-5xl'
             )}
           >
             {boundedScore}
           </span>
           {size !== 'sm' && (
-            <span className="text-[10px] uppercase font-bold text-slate-400 -mt-0.5 tracking-wider">
+            <span className="text-[10px] uppercase font-bold text-[#8E8A82] -mt-0.5 tracking-wider">
               / 100
             </span>
           )}
@@ -128,13 +138,13 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
       {/* Label and Rating Text */}
       {(label || showRating) && (
         <div className="mt-2.5 space-y-0.5">
-          {label && <div className="text-xs font-semibold text-slate-300">{label}</div>}
+          {label && <div className="text-xs font-semibold text-[#D8D4CA]">{label}</div>}
           {showRating && (
-            <div className={cn('text-[11px] font-bold uppercase tracking-wider', config.text)}>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B35]">
               {config.rating}
             </div>
           )}
-          {subLabel && <div className="text-[11px] text-slate-400">{subLabel}</div>}
+          {subLabel && <div className="text-[11px] text-[#8E8A82]">{subLabel}</div>}
         </div>
       )}
     </div>

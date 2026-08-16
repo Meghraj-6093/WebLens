@@ -19,7 +19,7 @@ import { ProfilePage } from './pages/ProfilePage.js';
 export const App: React.FC = () => {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen bg-[#070B14] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white">
+      <div className="min-h-screen bg-[#080A0E] text-[#F3F0E8] flex flex-col font-sans selection:bg-[#FF6B35] selection:text-[#080A0E]">
         <Header />
         <main className="flex-1">
           <Routes>
@@ -27,8 +27,11 @@ export const App: React.FC = () => {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/monitoring" element={<MonitoringPage />} />
             <Route path="/competitors" element={<CompetitorPage />} />
+            <Route path="/competitor" element={<CompetitorPage />} />
             <Route path="/agency" element={<AgencyPage />} />
             <Route path="/developers" element={<ApiKeysPage />} />
+            <Route path="/developer-api" element={<ApiKeysPage />} />
+            <Route path="/api" element={<ApiKeysPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/settings" element={<ProfilePage />} />
             <Route path="/projects" element={<ProjectsPage />} />

@@ -85,13 +85,13 @@ export const ProjectsPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[rgba(243,240,232,0.08)] pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Layers className="w-7 h-7 text-blue-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F3F0E8] tracking-tight flex items-center gap-2.5">
+            <Layers className="w-7 h-7 text-[#FF6B35]" />
             <span>Local Workspaces</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#8E8A82] mt-1">
             Organize target websites into local workspaces to monitor regressions and historical scores.
           </p>
         </div>
@@ -111,16 +111,16 @@ export const ProjectsPage: React.FC = () => {
         {projects.map((p) => (
           <div
             key={p.id}
-            className="card-glow rounded-2xl p-6 border border-slate-800 space-y-4 relative group flex flex-col justify-between"
+            className="card-glow rounded-2xl p-6 border border-[rgba(243,240,232,0.08)] bg-[#11151B] hover:border-[#FF6B35]/40 space-y-4 relative group flex flex-col justify-between transition-all"
           >
             <div className="space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h3 className="text-base font-bold text-white tracking-tight truncate group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-base font-bold text-[#F3F0E8] tracking-tight truncate group-hover:text-[#FF6B35] transition-colors">
                     {p.name}
                   </h3>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono mt-0.5">
-                    <Globe className="w-3 h-3 text-slate-500" />
+                  <div className="flex items-center gap-1.5 text-xs text-[#8E8A82] font-mono mt-0.5">
+                    <Globe className="w-3 h-3 text-[#6E6A63]" />
                     <span>{p.domain}</span>
                   </div>
                 </div>
@@ -129,7 +129,7 @@ export const ProjectsPage: React.FC = () => {
                   {p.scoreChange !== null && (
                     <span className={cn(
                       'text-xs font-bold font-mono px-2 py-0.5 rounded-full flex items-center gap-0.5 shrink-0',
-                      p.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                      p.scoreChange >= 0 ? 'bg-emerald-500/10 text-[#34D399]' : 'bg-rose-500/10 text-rose-400'
                     )}>
                       {p.scoreChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                       {p.scoreChange > 0 ? `+${p.scoreChange}` : p.scoreChange}
@@ -138,7 +138,7 @@ export const ProjectsPage: React.FC = () => {
                   <button
                     onClick={() => handleDeleteProject(p.id, p.name)}
                     title="Delete workspace"
-                    className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                    className="p-1 rounded text-[#8E8A82] hover:text-rose-400 hover:bg-rose-500/10 transition"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
@@ -146,22 +146,22 @@ export const ProjectsPage: React.FC = () => {
               </div>
 
               {p.description && (
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                <p className="text-xs text-[#8E8A82] line-clamp-2 leading-relaxed">
                   {p.description}
                 </p>
               )}
 
               <div className="flex items-baseline justify-between pt-2">
                 <div>
-                  <div className="text-[10px] text-slate-500 uppercase font-semibold">Latest Health Score</div>
-                  <div className="text-2xl font-extrabold font-mono text-emerald-400">
+                  <div className="text-[10px] text-[#6E6A63] uppercase font-semibold">Latest Health Score</div>
+                  <div className="text-2xl font-extrabold font-mono text-[#FF6B35]">
                     {p.latestScore !== null ? `${p.latestScore}/100` : '—'}
                   </div>
                 </div>
 
                 <div className="text-right">
-                  <div className="text-[10px] text-slate-500 uppercase font-semibold">Audits Run</div>
-                  <div className="text-sm font-bold font-mono text-white">
+                  <div className="text-[10px] text-[#6E6A63] uppercase font-semibold">Audits Run</div>
+                  <div className="text-sm font-bold font-mono text-[#F3F0E8]">
                     {p.totalScans} scans
                   </div>
                 </div>
@@ -169,12 +169,12 @@ export const ProjectsPage: React.FC = () => {
             </div>
 
             {/* Card Actions */}
-            <div className="pt-4 border-t border-slate-800/80 flex items-center justify-between gap-2">
+            <div className="pt-4 border-t border-[rgba(243,240,232,0.08)] flex items-center justify-between gap-2">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => handleRunProjectScan(p.domain)}
-                leftIcon={<RotateCw className="w-3.5 h-3.5 text-blue-400" />}
+                leftIcon={<RotateCw className="w-3.5 h-3.5 text-[#FF6B35]" />}
                 className="w-full text-xs"
               >
                 Scan Now
@@ -184,7 +184,7 @@ export const ProjectsPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(`/report/${p.latestScan!.id}`)}
-                  className="shrink-0 text-xs text-blue-400 hover:text-blue-300"
+                  className="shrink-0 text-xs text-[#FF6B35] hover:text-[#FF804F]"
                 >
                   Report →
                 </Button>
@@ -195,12 +195,12 @@ export const ProjectsPage: React.FC = () => {
       </div>
 
       {projects.length === 0 && !isLoading && (
-        <div className="card-glow rounded-3xl p-12 border border-slate-800 text-center space-y-4 max-w-md mx-auto">
-          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto">
+        <div className="card-glow rounded-3xl p-12 border border-[rgba(243,240,232,0.08)] bg-[#11151B] text-center space-y-4 max-w-md mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-[#FF6B35]/15 text-[#FF6B35] flex items-center justify-center mx-auto">
             <Layers className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white">No Workspaces Yet</h3>
-          <p className="text-xs text-slate-400 leading-relaxed">
+          <h3 className="text-base font-bold text-[#F3F0E8]">No Workspaces Yet</h3>
+          <p className="text-xs text-[#8E8A82] leading-relaxed">
             Create your first workspace to group client domains, personal portfolios, and web apps.
           </p>
           <Button size="sm" variant="primary" onClick={() => setIsModalOpen(true)}>
@@ -211,53 +211,53 @@ export const ProjectsPage: React.FC = () => {
 
       {/* Create Project Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="card-glow rounded-3xl w-full max-w-md p-6 sm:p-8 border border-slate-800 relative bg-[#0B101E] shadow-2xl space-y-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
+          <div className="card-glow rounded-3xl w-full max-w-md p-6 sm:p-8 border border-[rgba(243,240,232,0.12)] relative bg-[#0C0F14] shadow-2xl space-y-6">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="absolute top-5 right-5 p-1.5 rounded-lg bg-slate-800/60 hover:bg-slate-700 text-slate-400 hover:text-white"
+              className="absolute top-5 right-5 p-1.5 rounded-lg bg-[#151A21] hover:bg-[#1A2028] text-[#8E8A82] hover:text-[#F3F0E8]"
             >
               <X className="w-4 h-4" />
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white tracking-tight">Create Local Workspace</h3>
-              <p className="text-xs text-slate-400">Add a website domain to track its health over time.</p>
+              <h3 className="text-lg font-bold text-[#F3F0E8] tracking-tight">Create Local Workspace</h3>
+              <p className="text-xs text-[#8E8A82]">Add a website domain to track its health over time.</p>
             </div>
 
             <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-medium text-slate-300">Workspace Name</label>
+                <label className="font-medium text-[#D8D4CA]">Workspace Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="e.g. Client Portfolio or Marketing Site"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
+                  className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl px-3 py-2 text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35]"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-slate-300">Target Domain</label>
+                <label className="font-medium text-[#D8D4CA]">Target Domain</label>
                 <input
                   type="text"
                   required
                   value={domain}
                   onChange={(e) => setDomain(e.target.value)}
                   placeholder="example.com"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
+                  className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl px-3 py-2 text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35] font-mono"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-medium text-slate-300">Description (Optional)</label>
+                <label className="font-medium text-[#D8D4CA]">Description (Optional)</label>
                 <textarea
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Notes about this project"
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
+                  className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl px-3 py-2 text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35] resize-none"
                 />
               </div>
 

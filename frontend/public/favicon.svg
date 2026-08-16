@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32" fill="none">
   <defs>
     <linearGradient id="weblens-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#3B82F6" />
-      <stop offset="50%" stop-color="#6366F1" />
-      <stop offset="100%" stop-color="#22D3EE" />
+      <stop offset="0%" stop-color="#FF804F" />
+      <stop offset="50%" stop-color="#FF6B35" />
+      <stop offset="100%" stop-color="#D94F20" />
     </linearGradient>
   </defs>
   <rect width="32" height="32" rx="8" fill="url(#weblens-gradient)" />

@@ -10,29 +10,49 @@ export default {
   theme: {
     extend: {
       colors: {
-        background: '#090D16',
-        surface: {
-          DEFAULT: '#0F172A',
-          hover: '#1E293B',
-          border: '#1E293B',
-          card: '#0D1424',
+        background: '#080A0E',
+        obsidian: {
+          DEFAULT: '#080A0E',
+          deep: '#05070A',
+          subtle: '#0C0F14',
+          surface: '#11151B',
+          surface2: '#151A21',
+          surface3: '#1A2028',
         },
-        primary: {
-          DEFAULT: '#3B82F6',
-          hover: '#2563EB',
-          muted: 'rgba(59, 130, 246, 0.15)',
+        warm: {
+          white: '#F3F0E8',
+          muted: '#D8D4CA',
+          secondary: '#8E8A82',
+          subtle: '#6E6A63',
+          border: 'rgba(243, 240, 232, 0.08)',
+          'border-strong': 'rgba(243, 240, 232, 0.16)',
         },
-        accent: {
-          cyan: '#06B6D4',
-          emerald: '#10B981',
-          amber: '#F59E0B',
-          rose: '#F43F5E',
+        signal: {
+          orange: '#FF6B35',
+          light: '#FF804F',
+          dark: '#D94F20',
+          subtle: 'rgba(255, 107, 53, 0.12)',
+          border: 'rgba(255, 107, 53, 0.30)',
+        },
+        // Restrained semantic status colors
+        semantic: {
+          success: '#10B981',
+          'success-subtle': 'rgba(16, 185, 129, 0.12)',
+          warning: '#FF6B35',
+          'warning-subtle': 'rgba(255, 107, 53, 0.12)',
+          error: '#EF4444',
+          'error-subtle': 'rgba(239, 68, 68, 0.12)',
         }
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
       },
+      boxShadow: {
+        'orange-glow': '0 0 24px rgba(255, 107, 53, 0.15)',
+        'orange-sm': '0 0 12px rgba(255, 107, 53, 0.20)',
+        'card-elevated': '0 8px 30px rgba(0, 0, 0, 0.40)',
+      }
     },
   },
   plugins: [],

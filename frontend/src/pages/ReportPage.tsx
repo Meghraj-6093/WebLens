@@ -70,13 +70,13 @@ export const ReportPage: React.FC = () => {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
-        <Skeleton className="h-64 rounded-3xl" />
+        <Skeleton className="h-64 rounded-3xl bg-[#11151B]" />
         <div className="grid grid-cols-2 lg:grid-cols-6 gap-3.5">
           {[...Array(6)].map((_, i) => (
-            <Skeleton key={i} className="h-28 rounded-xl" />
+            <Skeleton key={i} className="h-28 rounded-xl bg-[#11151B]" />
           ))}
         </div>
-        <Skeleton className="h-96 rounded-3xl" />
+        <Skeleton className="h-96 rounded-3xl bg-[#11151B]" />
       </div>
     );
   }
@@ -87,8 +87,8 @@ export const ReportPage: React.FC = () => {
         <div className="w-14 h-14 rounded-2xl bg-rose-500/10 text-rose-400 border border-rose-500/20 flex items-center justify-center mx-auto">
           <AlertCircle className="w-7 h-7" />
         </div>
-        <h2 className="text-xl font-bold text-white">Unable to Display Report</h2>
-        <p className="text-sm text-slate-400">{error || 'Report not found in local workspace or remote server.'}</p>
+        <h2 className="text-xl font-bold text-[#F3F0E8]">Unable to Display Report</h2>
+        <p className="text-sm text-[#8E8A82]">{error || 'Report not found in local workspace or remote server.'}</p>
         <Button onClick={() => navigate('/')} variant="primary" size="sm">
           Run a New Scan
         </Button>
@@ -146,13 +146,13 @@ export const ReportPage: React.FC = () => {
   const navTabs: Array<{ id: ReportTab; label: string; icon: React.ReactNode }> = [
     { id: 'overview', label: 'Overview', icon: <Layers className="w-3.5 h-3.5" /> },
     { id: 'issues', label: 'All Findings', icon: <ListOrdered className="w-3.5 h-3.5" /> },
-    { id: 'performance', label: 'Performance', icon: <Zap className="w-3.5 h-3.5 text-amber-400" /> },
-    { id: 'seo', label: 'SEO', icon: <Globe className="w-3.5 h-3.5 text-blue-400" /> },
-    { id: 'accessibility', label: 'Accessibility', icon: <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> },
-    { id: 'security', label: 'Security', icon: <ShieldCheck className="w-3.5 h-3.5 text-cyan-400" /> },
-    { id: 'mobile', label: 'Mobile', icon: <Smartphone className="w-3.5 h-3.5 text-purple-400" /> },
-    { id: 'best_practices', label: 'Best Practices', icon: <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" /> },
-    { id: 'resources', label: 'Resources & Waterfall', icon: <FileText className="w-3.5 h-3.5 text-slate-400" /> },
+    { id: 'performance', label: 'Performance', icon: <Zap className="w-3.5 h-3.5 text-[#FF6B35]" /> },
+    { id: 'seo', label: 'SEO', icon: <Globe className="w-3.5 h-3.5 text-[#D8D4CA]" /> },
+    { id: 'accessibility', label: 'Accessibility', icon: <Sparkles className="w-3.5 h-3.5 text-[#10B981]" /> },
+    { id: 'security', label: 'Security', icon: <ShieldCheck className="w-3.5 h-3.5 text-[#D8D4CA]" /> },
+    { id: 'mobile', label: 'Mobile', icon: <Smartphone className="w-3.5 h-3.5 text-[#FF804F]" /> },
+    { id: 'best_practices', label: 'Best Practices', icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#D8D4CA]" /> },
+    { id: 'resources', label: 'Resources & Waterfall', icon: <FileText className="w-3.5 h-3.5 text-[#8E8A82]" /> },
   ];
 
   return (
@@ -163,13 +163,13 @@ export const ReportPage: React.FC = () => {
       {/* 2. Category Cards */}
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-[#8E8A82]">
             Category Breakdown
           </h2>
           {selectedCategory !== 'all' && (
             <button
               onClick={() => setSelectedCategory('all')}
-              className="text-xs text-blue-400 hover:underline font-mono"
+              className="text-xs text-[#FF6B35] hover:underline font-mono font-bold"
             >
               Show all categories
             </button>
@@ -202,7 +202,7 @@ export const ReportPage: React.FC = () => {
       />
 
       {/* 3. Sticky Tab Navigation Bar */}
-      <div className="sticky top-20 sm:top-24 z-30 bg-[#070B14]/95 backdrop-blur-md -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-2.5 border-y border-slate-800/80 shadow-lg">
+      <div className="sticky top-20 sm:top-24 z-30 bg-[#080A0E]/95 backdrop-blur-md -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-2.5 border-y border-[rgba(243,240,232,0.08)] shadow-lg">
         <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-px">
           {navTabs.map((tab) => {
             const isActive = activeTab === tab.id;
@@ -220,8 +220,8 @@ export const ReportPage: React.FC = () => {
                 className={cn(
                   'flex items-center gap-2 px-4 py-2 text-xs font-semibold whitespace-nowrap rounded-xl transition-all duration-150',
                   isActive
-                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                    ? 'bg-[#FF6B35] text-[#080A0E] font-bold shadow-sm'
+                    : 'text-[#8E8A82] hover:text-[#F3F0E8] hover:bg-[#151A21]'
                 )}
               >
                 {tab.icon}
@@ -244,8 +244,8 @@ export const ReportPage: React.FC = () => {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
               <div className="scroll-mt-32">
-                <h3 className="text-base font-bold text-white tracking-tight mb-3 flex items-center gap-2">
-                  <AlertCircle className="w-4 h-4 text-rose-400" />
+                <h3 className="text-base font-bold text-[#F3F0E8] tracking-tight mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-[#FF6B35]" />
                   <span>Prioritized Action Items</span>
                 </h3>
                 <div className="space-y-3">
@@ -256,8 +256,8 @@ export const ReportPage: React.FC = () => {
                       <IssueCard key={idx} issue={issue} />
                     ))}
                   {allIssues.filter(i => !i.passed && (i.severity === 'critical' || i.severity === 'high')).length === 0 && (
-                    <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-300 text-xs flex items-center gap-3">
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+                    <div className="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[#34D399] text-xs flex items-center gap-3">
+                      <CheckCircle2 className="w-5 h-5 text-[#34D399] shrink-0" />
                       <span>Zero critical or high severity defects detected! Your site is performing well.</span>
                     </div>
                   )}
@@ -321,15 +321,15 @@ export const ReportPage: React.FC = () => {
           {activeTab !== 'issues' && report.categories[activeTab as AuditCategory]?.metrics?.length > 0 && (
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               {report.categories[activeTab as AuditCategory].metrics.map((m) => (
-                <div key={m.id} className="card-glow rounded-xl p-3.5 border border-slate-800 space-y-1">
-                  <div className="text-[11px] text-slate-400 font-medium truncate">{m.name}</div>
+                <div key={m.id} className="card-glow rounded-xl p-3.5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-1">
+                  <div className="text-[11px] text-[#8E8A82] font-medium truncate">{m.name}</div>
                   <div className={cn(
                     'text-lg font-bold font-mono',
-                    m.status === 'good' ? 'text-emerald-400' : m.status === 'needs_improvement' ? 'text-amber-400' : 'text-rose-400'
+                    m.status === 'good' ? 'text-[#34D399]' : m.status === 'needs_improvement' ? 'text-[#FF6B35]' : 'text-rose-400'
                   )}>
                     {m.value}
                   </div>
-                  <div className="text-[10px] text-slate-500 leading-tight line-clamp-1">{m.description}</div>
+                  <div className="text-[10px] text-[#8E8A82] leading-tight line-clamp-1">{m.description}</div>
                 </div>
               ))}
             </div>
@@ -350,7 +350,7 @@ export const ReportPage: React.FC = () => {
               <IssueCard key={idx} issue={issue} />
             ))}
             {filteredIssues.length === 0 && (
-              <div className="p-8 text-center text-xs text-slate-500 card-glow rounded-2xl border border-slate-800">
+              <div className="p-8 text-center text-xs text-[#8E8A82] card-glow rounded-2xl border border-[rgba(243,240,232,0.08)] bg-[#11151B]">
                 No issues match your current filters.
               </div>
             )}

@@ -12,8 +12,7 @@ import {
   RotateCw, 
   Download,
   ArrowUpRight, 
-  ArrowDownRight, 
-  HardDrive
+  ArrowDownRight
 } from 'lucide-react';
 import { formatDate, cn } from '../lib/utils.js';
 
@@ -100,13 +99,13 @@ export const HistoryPage: React.FC = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[rgba(243,240,232,0.08)] pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
-            <Clock className="w-7 h-7 text-indigo-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#F3F0E8] tracking-tight flex items-center gap-2.5">
+            <Clock className="w-7 h-7 text-[#FF6B35]" />
             <span>Local Scan History</span>
           </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
+          <p className="text-xs sm:text-sm text-[#8E8A82] mt-1">
             Browse audits persisted in your browser's IndexedDB, compare regressions, or export JSON reports.
           </p>
         </div>
@@ -127,26 +126,26 @@ export const HistoryPage: React.FC = () => {
       {/* Filter Bar */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <div className="relative max-w-sm w-full">
-          <Search className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-[#8E8A82] absolute left-3 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Filter by domain (e.g. example.com)"
-            className="w-full bg-slate-900 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 font-mono"
+            className="w-full bg-[#11151B] border border-[rgba(243,240,232,0.12)] rounded-xl pl-9 pr-3 py-2 text-xs text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none focus:border-[#FF6B35] font-mono"
           />
         </div>
 
-        <div className="text-xs text-slate-400">
+        <div className="text-xs text-[#8E8A82]">
           Showing <strong>{filteredHistory.length}</strong> saved audits • Select 2 to compare
         </div>
       </div>
 
       {/* History Table */}
-      <div className="card-glow rounded-2xl border border-slate-800 overflow-hidden">
+      <div className="card-glow rounded-2xl border border-[rgba(243,240,232,0.08)] bg-[#11151B] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-slate-900/80 border-b border-slate-800 text-slate-400 font-semibold uppercase tracking-wider text-[10px]">
+            <thead className="bg-[#151A21] border-b border-[rgba(243,240,232,0.08)] text-[#8E8A82] font-semibold uppercase tracking-wider text-[10px]">
               <tr>
                 <th className="px-4 py-3 w-10">Compare</th>
                 <th className="px-5 py-3">Domain</th>
@@ -156,7 +155,7 @@ export const HistoryPage: React.FC = () => {
                 <th className="px-5 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 font-mono">
+            <tbody className="divide-y divide-[rgba(243,240,232,0.06)] font-mono">
               {filteredHistory.map((item) => {
                 const isSelected = selectedForCompare.includes(item.id);
                 return (
@@ -164,7 +163,7 @@ export const HistoryPage: React.FC = () => {
                     key={item.id}
                     className={cn(
                       'transition-colors',
-                      isSelected ? 'bg-blue-950/30' : 'hover:bg-slate-900/40'
+                      isSelected ? 'bg-[#FF6B35]/10' : 'hover:bg-[#151A21]/50'
                     )}
                   >
                     <td className="px-4 py-3.5 text-center">
@@ -172,45 +171,45 @@ export const HistoryPage: React.FC = () => {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleToggleSelect(item.id)}
-                        className="rounded border-slate-700 bg-slate-900 text-blue-600 focus:ring-0 cursor-pointer"
+                        className="rounded border-[rgba(243,240,232,0.2)] bg-[#11151B] accent-[#FF6B35] focus:ring-0 cursor-pointer"
                       />
                     </td>
-                    <td className="px-5 py-3.5 font-bold text-white">
+                    <td className="px-5 py-3.5 font-bold text-[#F3F0E8]">
                       <span>{item.domain}</span>
                     </td>
                     <td className="px-5 py-3.5">
                       {item.overallScore !== null ? (
                         <span className={cn(
                           'font-bold px-2 py-0.5 rounded text-xs',
-                          item.overallScore >= 90 ? 'bg-emerald-500/10 text-emerald-400' :
-                          item.overallScore >= 75 ? 'bg-blue-500/10 text-blue-400' :
-                          item.overallScore >= 50 ? 'bg-amber-500/10 text-amber-400' : 'bg-rose-500/10 text-rose-400'
+                          item.overallScore >= 90 ? 'bg-[#FF6B35]/15 text-[#FF6B35]' :
+                          item.overallScore >= 75 ? 'bg-[#FF804F]/15 text-[#FF804F]' :
+                          item.overallScore >= 50 ? 'bg-[#D94F20]/15 text-[#D94F20]' : 'bg-rose-500/15 text-rose-400'
                         )}>
                           {item.overallScore}/100
                         </span>
                       ) : (
-                        <span className="text-slate-500">In Progress</span>
+                        <span className="text-[#6E6A63]">In Progress</span>
                       )}
                     </td>
                     <td className="px-5 py-3.5">
                       {item.scoreChange !== null && item.scoreChange !== undefined ? (
                         <span className={cn(
                           'font-semibold text-[11px] px-2 py-0.5 rounded-full inline-flex items-center gap-0.5',
-                          item.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                          item.scoreChange >= 0 ? 'bg-emerald-500/10 text-[#34D399]' : 'bg-rose-500/10 text-rose-400'
                         )}>
                           {item.scoreChange >= 0 ? '+' : ''}{item.scoreChange}
                         </span>
                       ) : (
-                        <span className="text-slate-600">—</span>
+                        <span className="text-[#6E6A63]">—</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-slate-400 text-[11px]">
+                    <td className="px-5 py-3.5 text-[#8E8A82] text-[11px]">
                       {formatDate(item.completedAt || item.startedAt)}
                     </td>
                     <td className="px-5 py-3.5 text-right space-x-1.5 font-sans">
                       <button
                         onClick={() => navigate(`/report/${item.id}`)}
-                        className="text-xs font-semibold text-blue-400 hover:text-blue-300 transition-colors px-2 py-1 rounded bg-blue-500/10 hover:bg-blue-500/20"
+                        className="text-xs font-bold text-[#FF6B35] hover:text-[#080A0E] transition-colors px-2.5 py-1 rounded-xl bg-[#FF6B35]/15 hover:bg-[#FF6B35]"
                       >
                         View Report
                       </button>
@@ -218,21 +217,21 @@ export const HistoryPage: React.FC = () => {
                         onClick={() => handleReScan(item.domain, item.id)}
                         disabled={reScanningId === item.id}
                         title="Re-run audit"
-                        className="p-1 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition"
+                        className="p-1.5 rounded-lg text-[#8E8A82] hover:text-[#F3F0E8] hover:bg-[#151A21] transition"
                       >
-                        <RotateCw className={cn("w-3.5 h-3.5", reScanningId === item.id && "animate-spin text-blue-400")} />
+                        <RotateCw className={cn("w-3.5 h-3.5", reScanningId === item.id && "animate-spin text-[#FF6B35]")} />
                       </button>
                       <button
                         onClick={() => handleExportScan(item.id, item.domain)}
                         title="Export JSON"
-                        className="p-1 rounded text-slate-400 hover:text-emerald-400 hover:bg-emerald-500/10 transition"
+                        className="p-1.5 rounded-lg text-[#8E8A82] hover:text-[#34D399] hover:bg-emerald-500/10 transition"
                       >
                         <Download className="w-3.5 h-3.5" />
                       </button>
                       <button
                         onClick={() => handleDelete(item.id, item.domain)}
                         title="Delete from local history"
-                        className="p-1 rounded text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                        className="p-1.5 rounded-lg text-[#8E8A82] hover:text-rose-400 hover:bg-rose-500/10 transition"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -243,7 +242,7 @@ export const HistoryPage: React.FC = () => {
 
               {filteredHistory.length === 0 && !isLoading && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-10 text-center text-slate-500 font-sans">
+                  <td colSpan={6} className="px-5 py-10 text-center text-[#8E8A82] font-sans">
                     No audits found in your local history.
                   </td>
                 </tr>

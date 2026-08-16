@@ -2,69 +2,122 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --wl-obsidian: #080A0E;
+  --wl-obsidian-2: #0C0F14;
+  --wl-surface: #11151B;
+  --wl-surface-2: #151A21;
+  --wl-surface-3: #1A2028;
+
+  --wl-white: #F3F0E8;
+  --wl-white-muted: #D8D4CA;
+  --wl-text-secondary: #8E8A82;
+  --wl-text-subtle: #6E6A63;
+
+  --wl-orange: #FF6B35;
+  --wl-orange-light: #FF804F;
+  --wl-orange-dark: #D94F20;
+  --wl-orange-subtle: rgba(255, 107, 53, 0.12);
+
+  --wl-border: rgba(243, 240, 232, 0.08);
+  --wl-border-strong: rgba(243, 240, 232, 0.16);
+}
+
 @layer base {
   body {
-    background-color: #090D16;
-    color: #F1F5F9;
-    font-family: 'Inter', system-ui, sans-serif;
+    background-color: #080A0E;
+    color: #F3F0E8;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  }
+
+  ::selection {
+    background-color: #FF6B35;
+    color: #080A0E;
   }
 }
 
-/* Custom subtle scrollbar */
+/* Custom Obsidian & Warm Scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #090D16;
+  background: #080A0E;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1E293B;
+  background: #1A2028;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155;
+  background: #FF6B35;
 }
 
-/* Glass & Card Glow Effects */
+/* Precision Instrument Panel & Card Styles */
 .card-glow {
-  background: linear-gradient(180deg, rgba(15, 23, 42, 0.8) 0%, rgba(13, 20, 36, 0.95) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  background: #11151B;
+  border: 1px solid rgba(243, 240, 232, 0.08);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
 }
 
 .card-glow:hover {
-  border-color: rgba(59, 130, 246, 0.3);
+  border-color: rgba(255, 107, 53, 0.35);
 }
 
+.card-elevated {
+  background: #151A21;
+  border: 1px solid rgba(243, 240, 232, 0.12);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* Diagnostic Badge Styles */
 .badge-glow-critical {
-  background: rgba(244, 63, 94, 0.12);
-  border: 1px solid rgba(244, 63, 94, 0.3);
-  color: #FB7185;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #FCA5A5;
 }
 
 .badge-glow-high {
-  background: rgba(249, 115, 22, 0.12);
-  border: 1px solid rgba(249, 115, 22, 0.3);
-  color: #FB923C;
+  background: rgba(255, 107, 53, 0.15);
+  border: 1px solid rgba(255, 107, 53, 0.4);
+  color: #FF804F;
 }
 
 .badge-glow-medium {
   background: rgba(245, 158, 11, 0.12);
   border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #FBBF24;
+  color: #FCD34D;
 }
 
 .badge-glow-low {
-  background: rgba(59, 130, 246, 0.12);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #60A5FA;
+  background: rgba(243, 240, 232, 0.08);
+  border: 1px solid rgba(243, 240, 232, 0.18);
+  color: #D8D4CA;
 }
 
 .badge-glow-passed {
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #34D399;
+}
+
+/* Signal Orange Button Glow */
+.btn-signal-orange {
+  background-color: #FF6B35;
+  color: #080A0E;
+  font-weight: 700;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 4px 16px rgba(255, 107, 53, 0.25);
+}
+
+.btn-signal-orange:hover {
+  background-color: #FF804F;
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-signal-orange:active {
+  background-color: #D94F20;
+  transform: translateY(0);
 }
 
 /* ========================================================= */
@@ -78,11 +131,10 @@
 
   body {
     background-color: #FFFFFF !important;
-    color: #0F172A !important;
+    color: #080A0E !important;
     font-size: 11pt !important;
   }
 
-  /* Hide navigation, footers, interactive buttons, modal triggers, and animations */
   header,
   footer,
   button,
@@ -94,31 +146,26 @@
     display: none !important;
   }
 
-  /* Convert dark cards to crisp executive white cards with subtle borders */
-  .card-glow {
+  .card-glow, .card-elevated {
     background: #FFFFFF !important;
     border: 1px solid #E2E8F0 !important;
     box-shadow: none !important;
-    color: #0F172A !important;
+    color: #080A0E !important;
     page-break-inside: avoid;
   }
 
   h1, h2, h3, h4 {
-    color: #0F172A !important;
+    color: #080A0E !important;
   }
 
   p, span, div {
     color: #334155 !important;
   }
 
-  /* Force color badges and score gauges to print clearly */
-  .text-emerald-400 { color: #059669 !important; }
-  .text-amber-400 { color: #D97706 !important; }
-  .text-rose-400 { color: #DC2626 !important; }
-  .text-blue-400 { color: #2563EB !important; }
-  .text-indigo-400 { color: #4F46E5 !important; }
+  .text-signal-orange, .text-orange-400 {
+    color: #D94F20 !important;
+  }
 
-  /* Printable headers and page break management */
   .break-before-page {
     page-break-before: always;
   }

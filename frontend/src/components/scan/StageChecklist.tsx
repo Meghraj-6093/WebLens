@@ -37,7 +37,7 @@ const STAGES: StageDefinition[] = [
   { id: 'scoring', title: 'Compiling Health Dashboard', description: 'Calculating weighted scores and actionable fixes', icon: <Sparkles className="w-4 h-4" /> },
 ];
 
-export const StageChecklist: React.FC<StageChecklistProps> = ({ currentStage, progress }) => {
+export const StageChecklist: React.FC<StageChecklistProps> = ({ currentStage }) => {
   const stageOrder: ScanStage[] = [
     'connecting',
     'fetching',
@@ -73,32 +73,32 @@ export const StageChecklist: React.FC<StageChecklistProps> = ({ currentStage, pr
             key={s.id}
             className={cn(
               'flex items-center justify-between p-3 rounded-xl border transition-all duration-300',
-              status === 'completed' && 'bg-slate-900/60 border-slate-800/80 text-slate-300',
-              status === 'active' && 'bg-blue-950/40 border-blue-500/50 text-white shadow-lg shadow-blue-900/20 scale-[1.01]',
-              status === 'pending' && 'bg-slate-900/20 border-slate-800/30 text-slate-600 opacity-60'
+              status === 'completed' && 'bg-[#11151B] border-[rgba(243,240,232,0.08)] text-[#D8D4CA]',
+              status === 'active' && 'bg-[#151A21] border-[#FF6B35]/60 text-[#F3F0E8] shadow-lg shadow-[#FF6B35]/10 scale-[1.01]',
+              status === 'pending' && 'bg-[#080A0E]/50 border-[rgba(243,240,232,0.04)] text-[#6E6A63] opacity-60'
             )}
           >
             <div className="flex items-center gap-3">
               <div
                 className={cn(
                   'w-8 h-8 rounded-lg flex items-center justify-center transition-colors shrink-0',
-                  status === 'completed' && 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
-                  status === 'active' && 'bg-blue-500/20 text-blue-400 border border-blue-500/40 animate-pulse',
-                  status === 'pending' && 'bg-slate-800/30 text-slate-600'
+                  status === 'completed' && 'bg-emerald-500/10 text-[#34D399] border border-emerald-500/20',
+                  status === 'active' && 'bg-[#FF6B35]/20 text-[#FF6B35] border border-[#FF6B35]/40 animate-pulse',
+                  status === 'pending' && 'bg-[#11151B] text-[#6E6A63]'
                 )}
               >
                 {s.icon}
               </div>
               <div className="min-w-0">
-                <div className="text-xs sm:text-sm font-semibold tracking-tight truncate">{s.title}</div>
-                <div className="text-[11px] text-slate-400 truncate">{s.description}</div>
+                <div className="text-xs sm:text-sm font-semibold tracking-tight truncate text-[#F3F0E8]">{s.title}</div>
+                <div className="text-[11px] text-[#8E8A82] truncate">{s.description}</div>
               </div>
             </div>
 
             <div className="shrink-0 pl-2">
-              {status === 'completed' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-              {status === 'active' && <Loader2 className="w-4 h-4 text-blue-400 animate-spin" />}
-              {status === 'pending' && <Circle className="w-3.5 h-3.5 text-slate-700" />}
+              {status === 'completed' && <CheckCircle2 className="w-4 h-4 text-[#34D399]" />}
+              {status === 'active' && <Loader2 className="w-4 h-4 text-[#FF6B35] animate-spin" />}
+              {status === 'pending' && <Circle className="w-3.5 h-3.5 text-[#6E6A63]" />}
             </div>
           </div>
         );

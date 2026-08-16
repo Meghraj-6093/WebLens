@@ -27,12 +27,12 @@ interface CategoryCardMeta {
 }
 
 const CATEGORY_META: CategoryCardMeta[] = [
-  { key: 'performance', title: 'Performance', weight: '25%', icon: <Zap className="w-4 h-4 text-amber-400" /> },
-  { key: 'seo', title: 'SEO', weight: '20%', icon: <Globe className="w-4 h-4 text-blue-400" /> },
-  { key: 'accessibility', title: 'Accessibility', weight: '20%', icon: <Sparkles className="w-4 h-4 text-emerald-400" /> },
-  { key: 'security', title: 'Security', weight: '15%', icon: <ShieldCheck className="w-4 h-4 text-cyan-400" /> },
-  { key: 'mobile', title: 'Mobile', weight: '10%', icon: <Smartphone className="w-4 h-4 text-purple-400" /> },
-  { key: 'best_practices', title: 'Best Practices', weight: '10%', icon: <CheckCircle2 className="w-4 h-4 text-indigo-400" /> },
+  { key: 'performance', title: 'Performance', weight: '25%', icon: <Zap className="w-4 h-4 text-[#FF6B35]" /> },
+  { key: 'seo', title: 'SEO', weight: '20%', icon: <Globe className="w-4 h-4 text-[#D8D4CA]" /> },
+  { key: 'accessibility', title: 'Accessibility', weight: '20%', icon: <Sparkles className="w-4 h-4 text-[#10B981]" /> },
+  { key: 'security', title: 'Security', weight: '15%', icon: <ShieldCheck className="w-4 h-4 text-[#D8D4CA]" /> },
+  { key: 'mobile', title: 'Mobile', weight: '10%', icon: <Smartphone className="w-4 h-4 text-[#FF804F]" /> },
+  { key: 'best_practices', title: 'Best Practices', weight: '10%', icon: <CheckCircle2 className="w-4 h-4 text-[#D8D4CA]" /> },
 ];
 
 export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
@@ -42,9 +42,9 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
   onOpenBreakdown,
 }) => {
   const getScoreColor = (score: number) => {
-    if (score >= 90) return 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
-    if (score >= 75) return 'text-blue-400 bg-blue-500/10 border-blue-500/20';
-    if (score >= 50) return 'text-amber-400 bg-amber-500/10 border-amber-500/20';
+    if (score >= 90) return 'text-[#FF6B35] bg-[#FF6B35]/15 border-[#FF6B35]/30';
+    if (score >= 70) return 'text-[#FF804F] bg-[#FF804F]/15 border-[#FF804F]/30';
+    if (score >= 50) return 'text-[#D94F20] bg-[#D94F20]/15 border-[#D94F20]/30';
     return 'text-rose-400 bg-rose-500/10 border-rose-500/20';
   };
 
@@ -64,23 +64,23 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
             className={cn(
               'p-4 rounded-xl border transition-all duration-200 cursor-pointer flex flex-col justify-between group relative',
               isSelected
-                ? 'bg-blue-950/40 border-blue-500 shadow-lg shadow-blue-500/10 scale-[1.02]'
-                : 'card-glow border-slate-800/80 hover:border-slate-700 hover:bg-slate-900/80'
+                ? 'bg-[#151A21] border-[#FF6B35] shadow-lg shadow-[#FF6B35]/10 scale-[1.02]'
+                : 'card-glow border-[rgba(243,240,232,0.08)] hover:border-[#FF6B35]/40 hover:bg-[#151A21]'
             )}
           >
             <div>
               <div className="flex items-center justify-between gap-1 mb-2.5">
                 <div className="flex items-center gap-1.5">
-                  <div className="p-1.5 rounded-lg bg-slate-800/60 group-hover:scale-110 transition-transform">
+                  <div className="p-1.5 rounded-lg bg-[#151A21] group-hover:scale-110 transition-transform">
                     {meta.icon}
                   </div>
-                  <span className="text-xs font-semibold text-slate-200 truncate">{meta.title}</span>
+                  <span className="text-xs font-semibold text-[#F3F0E8] truncate">{meta.title}</span>
                 </div>
-                <span className="text-[10px] font-mono text-slate-500 shrink-0">{meta.weight}</span>
+                <span className="text-[10px] font-mono text-[#8E8A82] shrink-0">{meta.weight}</span>
               </div>
 
               <div className="flex items-baseline justify-between mt-3">
-                <span className={cn('text-2xl font-extrabold font-mono tracking-tight', getScoreColor(score).split(' ')[0])}>
+                <span className="text-2xl font-extrabold font-mono tracking-tight text-[#F3F0E8]">
                   {score}
                 </span>
                 <span className={cn('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', getScoreColor(score))}>
@@ -89,7 +89,7 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
               </div>
             </div>
 
-            <div className="mt-3.5 pt-2.5 border-t border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
+            <div className="mt-3.5 pt-2.5 border-t border-[rgba(243,240,232,0.08)] flex items-center justify-between text-[11px] text-[#8E8A82]">
               <span>{failedCount === 0 ? 'All passed' : `${failedCount} issue${failedCount > 1 ? 's' : ''}`}</span>
               {onOpenBreakdown ? (
                 <button
@@ -98,13 +98,13 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
                     e.stopPropagation();
                     onOpenBreakdown(meta.key);
                   }}
-                  className="p-1 text-slate-500 hover:text-blue-400 rounded transition"
+                  className="p-1 text-[#8E8A82] hover:text-[#FF6B35] rounded transition"
                   title={`View ${meta.title} score deductions`}
                 >
                   <Calculator className="w-3.5 h-3.5" />
                 </button>
               ) : (
-                <ChevronRight className={cn('w-3.5 h-3.5 transition-transform text-slate-500', isSelected && 'rotate-90 text-blue-400')} />
+                <ChevronRight className={cn('w-3.5 h-3.5 transition-transform text-[#8E8A82]', isSelected && 'rotate-90 text-[#FF6B35]')} />
               )}
             </div>
           </div>
