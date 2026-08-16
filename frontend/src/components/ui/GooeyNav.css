@@ -118,16 +118,7 @@
 }
 
 .gooey-nav-container .effect.filter {
-  filter: blur(4px) contrast(20) blur(0);
-  mix-blend-mode: screen;
-}
-
-.gooey-nav-container .effect.filter::before {
-  content: '';
-  position: absolute;
-  inset: -60px;
-  z-index: -2;
-  background: #080A0E;
+  pointer-events: none;
 }
 
 .gooey-nav-container .effect.filter::after {
