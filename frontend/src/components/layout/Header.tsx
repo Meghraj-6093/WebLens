@@ -59,7 +59,7 @@ export const Header: React.FC = () => {
         <div
           onMouseMove={handleMouseMove}
           className={cn(
-            'liquid-glass-navbar rounded-[24px] sm:rounded-[26px] px-4 sm:px-6 lg:px-7 h-15 sm:h-16 flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 sm:gap-4',
+            'liquid-glass-navbar rounded-[28px] sm:rounded-[34px] px-4 sm:px-6 lg:px-8 h-15 sm:h-[68px] flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 sm:gap-4',
             isScrolled && 'scrolled'
           )}
         >
@@ -94,7 +94,7 @@ export const Header: React.FC = () => {
             <Link
               to="/profile"
               className={cn(
-                'liquid-glass-capsule inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-xl text-[11px] sm:text-xs font-display font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] group',
+                'liquid-glass-capsule inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 rounded-full text-[11px] sm:text-xs font-display font-medium transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] group',
                 location.pathname.startsWith('/profile') || location.pathname.startsWith('/settings')
                   ? 'border-[#FF6B35]/50 bg-[#151A21]/90 text-[#F3F0E8] shadow-sm shadow-[#FF6B35]/20'
                   : 'text-[#D8D4CA] hover:text-[#F3F0E8]'
