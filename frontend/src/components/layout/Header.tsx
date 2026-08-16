@@ -59,7 +59,7 @@ export const Header: React.FC = () => {
         <div
           onMouseMove={handleMouseMove}
           className={cn(
-            'liquid-glass-navbar rounded-[28px] sm:rounded-[34px] px-4 sm:px-6 lg:px-8 h-15 sm:h-[68px] flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 sm:gap-4',
+            'liquid-glass-navbar rounded-full px-4 sm:px-6 lg:px-8 h-16 sm:h-[72px] flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 sm:gap-4',
             isScrolled && 'scrolled'
           )}
         >
@@ -67,7 +67,7 @@ export const Header: React.FC = () => {
           <div className="flex items-center justify-start shrink-0 relative z-10">
             <Link
               to="/"
-              className="flex items-center group transition-transform duration-200 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] rounded-xl"
+              className="flex items-center group transition-transform duration-200 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] rounded-full"
               aria-label="WebLens Home"
             >
               <WebLensLogo size="md" />

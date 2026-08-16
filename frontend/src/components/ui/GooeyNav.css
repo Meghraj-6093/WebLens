@@ -19,7 +19,8 @@
 
 .gooey-nav-container nav ul {
   display: flex;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.35rem;
   list-style: none;
   padding: 0;
   margin: 0;
@@ -41,12 +42,14 @@
 }
 
 .gooey-nav-container nav ul li a {
-  display: inline-block;
-  padding: 0.35rem 0.95rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.45rem 1.1rem;
   font-family: var(--font-display, 'Space Grotesk', system-ui, sans-serif);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 600;
-  line-height: 1rem;
+  line-height: 1.1rem;
   letter-spacing: -0.015em;
   color: #D8D4CA;
   transition: color 0.2s ease;
@@ -106,9 +109,9 @@
 .gooey-nav-container .effect.text {
   font-family: var(--font-display, 'Space Grotesk', system-ui, sans-serif);
   color: #D8D4CA;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  line-height: 1rem;
+  line-height: 1.1rem;
   letter-spacing: -0.015em;
   white-space: nowrap;
   transition: color 0.3s ease;
@@ -127,16 +130,18 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: rgba(243, 240, 232, 0.42);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  backdrop-filter: blur(14px) saturate(140%);
+  background: rgba(243, 240, 232, 0.40);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.30);
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.12),
+    inset 0 1px 1px rgba(255, 255, 255, 0.40),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
   transform: scale(0);
   opacity: 0;
   z-index: -1;
   border-radius: 9999px;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.20),
-    0 2px 10px rgba(0, 0, 0, 0.12);
 }
 
 .gooey-nav-container .effect.active::after {
