@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ShieldCheck, Zap, Globe, Smartphone, Heart, Lock, ArrowUpRight } from 'lucide-react';
+import { ShieldCheck, Zap, Globe, Smartphone, Heart, Lock, ArrowUpRight } from 'lucide-react';
 import { DepthText } from '../ui/DepthText.js';
+import { WebLensLogo } from '../brand/WebLensLogo.js';
 
 export const Footer: React.FC = () => {
   return (
@@ -16,17 +17,9 @@ export const Footer: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 lg:gap-10 mb-10">
             {/* Brand Column (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF804F] via-[#FF6B35] to-[#D94F20] flex items-center justify-center shadow-md shadow-[#FF6B35]/20 shrink-0">
-                  <Activity className="w-4 h-4 text-white" />
-                </div>
-                <span className="font-extrabold text-base text-[#F3F0E8] font-mono tracking-tight flex items-center gap-1.5">
-                  WebLens
-                  <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30">
-                    PRO
-                  </span>
-                </span>
-              </div>
+              <Link to="/" className="inline-block focus:outline-none" aria-label="WebLens Home">
+                <WebLensLogo size="lg" />
+              </Link>
               <p className="text-xs text-[#8E8A82] leading-relaxed max-w-sm">
                 Precision website diagnostics & technical health auditing. Real-time Core Web Vitals, SEO hierarchy, WCAG accessibility, and security telemetry — persisted privately in your browser.
               </p>

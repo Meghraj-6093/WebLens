@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  Activity, 
   HardDrive,
   Menu,
   X
 } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 import { GooeyNav, GooeyNavItem } from '../ui/GooeyNav.js';
+import { WebLensLogo } from '../brand/WebLensLogo.js';
 
 export const Header: React.FC = () => {
   const location = useLocation();
@@ -62,16 +62,8 @@ export const Header: React.FC = () => {
         >
           {/* Left: Brand Logo & Wordmark */}
           <div className="flex items-center gap-3 sm:gap-6 shrink-0">
-            <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[#FF804F] via-[#FF6B35] to-[#D94F20] flex items-center justify-center shadow-md shadow-[#FF6B35]/25 group-hover:scale-105 transition-transform shrink-0">
-                <Activity className="w-4 h-4 text-white" />
-              </div>
-              <span className="text-sm sm:text-base font-extrabold tracking-tight text-[#F3F0E8] font-mono flex items-center gap-1.5">
-                WebLens
-                <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-[#FF6B35]/15 text-[#FF6B35] border border-[#FF6B35]/30 hidden min-[400px]:inline-block">
-                  PRO
-                </span>
-              </span>
+            <Link to="/" className="flex items-center focus:outline-none" aria-label="WebLens Home">
+              <WebLensLogo size="md" />
             </Link>
 
             {/* Desktop Navigation Links with React Bits GooeyNav */}

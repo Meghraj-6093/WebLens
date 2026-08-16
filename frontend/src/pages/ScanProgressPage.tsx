@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useScanEvents } from '../hooks/useScanEvents.js';
 import { StageChecklist } from '../components/scan/StageChecklist.js';
 import { Button } from '../components/ui/Button.js';
-import { Activity, AlertTriangle, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, ArrowLeft, Clock, CheckCircle2 } from 'lucide-react';
+import { WebLensIcon } from '../components/brand/WebLensLogo.js';
 
 export const ScanProgressPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -38,7 +39,7 @@ export const ScanProgressPage: React.FC = () => {
         <div className="space-y-3 relative z-10">
           <div className="flex items-center justify-center gap-3">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#FF6B35]/15 border border-[#FF6B35]/30 text-[#FF6B35] text-xs font-mono font-bold">
-              <Activity className="w-3.5 h-3.5 animate-pulse" />
+              <WebLensIcon size={14} className="animate-pulse" />
               <span>Scan ID: {id?.substring(0, 8)}...</span>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#151A21] border border-[rgba(243,240,232,0.10)] text-[#8E8A82] text-xs font-mono">
