@@ -12,9 +12,9 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces",
+    "dev": "concurrently -n \"API,APP\" -c \"blue,cyan\" \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "npm run dev --workspace=@weblens/backend",
     "dev:frontend": "npm run dev --workspace=@weblens/frontend",
-    "dev": "npm run dev:backend",
     "start": "node backend/dist/server.js",
     "test": "npx tsx test-e2e.ts"
   },
@@ -26,5 +26,8 @@
     "security-audit"
   ],
   "author": "WebLens Team",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
 }
