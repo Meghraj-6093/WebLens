@@ -59,12 +59,12 @@ export const Header: React.FC = () => {
         <div
           onMouseMove={handleMouseMove}
           className={cn(
-            'liquid-glass-navbar rounded-[24px] sm:rounded-[26px] px-4 sm:px-6 lg:px-7 h-15 sm:h-16 flex items-center justify-between gap-3 sm:gap-6',
+            'liquid-glass-navbar rounded-[24px] sm:rounded-[26px] px-4 sm:px-6 lg:px-7 h-15 sm:h-16 flex lg:grid lg:grid-cols-[1fr_auto_1fr] items-center justify-between gap-3 sm:gap-4',
             isScrolled && 'scrolled'
           )}
         >
-          {/* Left: Brand Logo & Wordmark (Home / Scanner Entry Point) */}
-          <div className="flex items-center gap-4 sm:gap-8 shrink-0 relative z-10">
+          {/* Region 1 (Left): Brand Logo & Wordmark */}
+          <div className="flex items-center justify-start shrink-0 relative z-10">
             <Link
               to="/"
               className="flex items-center group transition-transform duration-200 hover:scale-[1.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF6B35] rounded-xl"
@@ -72,25 +72,25 @@ export const Header: React.FC = () => {
             >
               <WebLensLogo size="md" />
             </Link>
-
-            {/* Desktop Navigation Links with React Bits GooeyNav */}
-            <div className="hidden lg:flex items-center">
-              <GooeyNav
-                items={navLinks}
-                activeIndex={activeIndex}
-                onNavigate={(item) => navigate(item.href)}
-                particleCount={12}
-                particleDistances={[65, 10]}
-                particleR={75}
-                animationTime={500}
-                timeVariance={150}
-                colors={[1, 1, 1, 2, 2, 3, 1]}
-              />
-            </div>
           </div>
 
-          {/* Right: Local Workspace (Profile / Settings Entry Point) & Mobile Menu Toggle */}
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0 relative z-10">
+          {/* Region 2 (Center): Centered Secondary Navigation Controls with GooeyNav */}
+          <div className="hidden lg:flex items-center justify-center justify-self-center relative z-10">
+            <GooeyNav
+              items={navLinks}
+              activeIndex={activeIndex}
+              onNavigate={(item) => navigate(item.href)}
+              particleCount={12}
+              particleDistances={[65, 10]}
+              particleR={75}
+              animationTime={500}
+              timeVariance={150}
+              colors={[1, 1, 1, 2, 2, 3, 1]}
+            />
+          </div>
+
+          {/* Region 3 (Right): Local Workspace (Profile / Settings Entry Point) & Mobile Menu Toggle */}
+          <div className="flex items-center justify-end justify-self-end gap-2 sm:gap-3 shrink-0 relative z-10">
             <Link
               to="/profile"
               className={cn(
