@@ -16,7 +16,9 @@
     "dev:backend": "npm run dev --workspace=@weblens/backend",
     "dev:frontend": "npm run dev --workspace=@weblens/frontend",
     "start": "node backend/dist/server.js",
-    "test": "npx tsx test-e2e.ts"
+    "test": "npx tsx tests/e2e.test.ts",
+    "test:security": "npx tsx tests/production-attack.test.ts",
+    "test:inputs": "npx tsx tests/clean-inputs.test.ts"
   },
   "keywords": [
     "website-auditor",

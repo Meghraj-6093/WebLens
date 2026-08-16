@@ -11,7 +11,6 @@ async function testCleanUrlInputs() {
   const homeInputVal = await page.locator('input[placeholder*="Enter URL"]').inputValue();
   console.log(`[Home Scanner] Input value: "${homeInputVal}" (Expected: "")`);
   if (homeInputVal !== '') throw new Error(`Home scanner is not empty: ${homeInputVal}`);
-  await page.screenshot({ path: 'screenshot_clean_home.png', fullPage: false });
 
   // 2. Check Competitor Benchmark URLs
   await page.goto('http://localhost:5173/competitors', { waitUntil: 'networkidle' });
@@ -20,14 +19,12 @@ async function testCleanUrlInputs() {
   for (const val of compInputs) {
     if (val !== '') throw new Error(`Competitor input is not empty: ${val}`);
   }
-  await page.screenshot({ path: 'screenshot_clean_competitors.png', fullPage: false });
 
   // 3. Check Dashboard Quick Scan URL
   await page.goto('http://localhost:5173/dashboard', { waitUntil: 'networkidle' });
   const dashInputVal = await page.locator('input[placeholder*="quick audit"]').inputValue();
   console.log(`[Dashboard] Quick scan input value: "${dashInputVal}" (Expected: "")`);
   if (dashInputVal !== '') throw new Error(`Dashboard quick scan input is not empty: ${dashInputVal}`);
-  await page.screenshot({ path: 'screenshot_clean_dashboard.png', fullPage: false });
 
   // 4. Check Monitoring Add Site URL
   await page.goto('http://localhost:5173/monitoring', { waitUntil: 'networkidle' });
@@ -36,7 +33,6 @@ async function testCleanUrlInputs() {
   const monitorInputVal = await page.locator('input[placeholder*="Enter website URL"]').inputValue();
   console.log(`[Monitoring] Add site input value: "${monitorInputVal}" (Expected: "")`);
   if (monitorInputVal !== '') throw new Error(`Monitoring input is not empty: ${monitorInputVal}`);
-  await page.screenshot({ path: 'screenshot_clean_monitoring.png', fullPage: false });
 
   // 5. Check Projects Add Workspace Domain
   await page.goto('http://localhost:5173/projects', { waitUntil: 'networkidle' });
@@ -45,7 +41,6 @@ async function testCleanUrlInputs() {
   const projectDomainVal = await page.locator('input[placeholder*="yourwebsite.com"]').inputValue();
   console.log(`[Projects] Target domain input value: "${projectDomainVal}" (Expected: "")`);
   if (projectDomainVal !== '') throw new Error(`Project domain input is not empty: ${projectDomainVal}`);
-  await page.screenshot({ path: 'screenshot_clean_projects.png', fullPage: false });
 
   await browser.close();
   console.log('\n✅ ALL URL INPUTS VERIFIED 100% CLEAN AND EMPTY ACROSS ALL ROUTES!');

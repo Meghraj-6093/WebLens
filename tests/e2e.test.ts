@@ -21,7 +21,7 @@ async function runLocalFirstE2E() {
   });
 
   const routes = [
-    { path: '/', name: 'Scanner', expectedText: 'See what’s wrong with your website' },
+    { path: '/', name: 'Scanner', expectedText: 'Analyze Website' },
     { path: '/dashboard', name: 'Dashboard', expectedText: 'WebLens Local Dashboard' },
     { path: '/monitoring', name: 'Monitoring', expectedText: 'Continuous Monitoring' },
     { path: '/competitors', name: 'Competitors', expectedText: 'Competitor Benchmark Matrix' },
@@ -63,15 +63,21 @@ async function runLocalFirstE2E() {
   }
   console.log('  ✔ Developer API Explorer executed live request to /api/health with status 200 OK.');
 
-  // 3. Test Navbar Links Click Flow
+  // 3. Test Navbar Navigation Links Click Flow
   console.log('\n--- 3. Testing Navbar Navigation Links Click Flow ---');
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  const navLabels = ['Dashboard', 'Monitoring', 'Competitors', 'Agency', 'API', 'Profile', 'Scanner'];
+  const navLabels = ['Dashboard', 'Monitoring', 'Competitors', 'Agency', 'API'];
   for (const label of navLabels) {
-    await page.click(`header nav a:has-text("${label}")`);
+    await page.click(`.gooey-nav-container a:has-text("${label}")`);
     await page.waitForTimeout(300);
   }
-  console.log('  ✔ All 7 navbar items navigated cleanly without errors.');
+  // Click logo to go home
+  await page.click('header a[href="/"]');
+  await page.waitForTimeout(300);
+  // Click Local Workspace capsule
+  await page.click('header a[href="/profile"]');
+  await page.waitForTimeout(300);
+  console.log('  ✔ All navbar items and capsules navigated cleanly without errors.');
 
   // 4. Test Live URL Scan & IndexedDB Auto-Persistence
   console.log('\n--- 4. Testing End-to-End Scan & Local IndexedDB Persistence ---');
@@ -119,7 +125,7 @@ async function runLocalFirstE2E() {
   await browser.close();
 
   console.log('\n================================================================');
-  console.log('🎯 ALL 7 ROUTES & LOCAL-FIRST FLOWS VERIFIED (100% PASS)');
+  console.log('🎯 ALL ROUTES & LOCAL-FIRST FLOWS VERIFIED (100% PASS)');
   console.log('================================================================\n');
 }
 

@@ -7,7 +7,7 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-# Diagnostic / DB files
+# Database & SQLite files
 *.db
 *.db-wal
 *.db-shm
@@ -15,31 +15,59 @@ lerna-debug.log*
 *.sqlite3
 weblens.db
 
-# Dependencies
-node_modules
-dist
-dist-ssr
+# Dependencies & Build Output
+node_modules/
+dist/
+dist-ssr/
+build/
+coverage/
 *.local
 
-# Editor directories and files
+# Screenshots & Temporary Test Captures (Preserve app assets)
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.bmp
+*.tiff
+!frontend/public/**
+!public/**
+!assets/**
+
+# Temporary & Cache files
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*.swp
+*.dump
+*.trace
+*.out
+*.cache
+.cache/
+.vite/
+
+# Editor & OS files
 .vscode/*
 !.vscode/extensions.json
-.idea
+.idea/
 .DS_Store
+Thumbs.db
+desktop.ini
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# Environment variables
+# Environment variables & Secrets
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env.*
+!.env.example
 
-# Playwright artifacts
+# Playwright artifacts & Test reports
 test-results/
 playwright-report/
 blob-report/
