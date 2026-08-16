@@ -20,6 +20,7 @@ import { createWhiteLabelRouter } from './routes/whiteLabel.js';
 import { createPublicApiRouter } from './routes/v1/api.js';
 import { createAdminRouter } from './routes/admin.js';
 import { createBillingRouter } from './routes/billing.js';
+import { createUserRouter } from './routes/user.js';
 import { Logger } from './utils/logger.js';
 
 dotenv.config();
@@ -82,6 +83,7 @@ app.get('/api/health', (_req, res) => {
 
 // 7. Mount REST Routes (Phases 1-4)
 app.use('/api/auth', createAuthRouter(authService));
+app.use('/api/user', createUserRouter(repository, authService));
 app.use('/api/projects', createProjectRouter(repository));
 app.use('/api/history', createHistoryRouter(repository, scanService));
 app.use('/api/ai', createAiRouter());

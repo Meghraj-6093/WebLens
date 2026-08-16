@@ -15,7 +15,8 @@ import {
   Building2,
   Key,
   Shield,
-  CreditCard
+  CreditCard,
+  Zap
 } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 
@@ -31,9 +32,13 @@ export const Header: React.FC = () => {
     { to: '/competitors', label: 'Competitors' },
     { to: '/agency', label: 'Agency' },
     { to: '/developers', label: 'API' },
-    { to: '/pricing', label: 'Pricing' },
-    { to: '/admin', label: 'Admin' },
+    { to: '/profile', label: 'Profile' },
   ];
+
+  // Only append Admin if authenticated user is explicitly an admin
+  if (user?.role === 'admin') {
+    navLinks.push({ to: '/admin', label: 'Admin Console' });
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-slate-800/80 bg-[#070B14]/80 backdrop-blur-md">
@@ -84,16 +89,29 @@ export const Header: React.FC = () => {
             <span>Interactive Demo</span>
           </button>
 
+          {user && user.tier === 'free' && (
+            <Link
+              to="/pricing"
+              className="hidden md:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-xs font-semibold text-amber-300 bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 transition-colors"
+            >
+              <Zap className="w-3 h-3 text-amber-400" />
+              <span>Upgrade</span>
+            </Link>
+          )}
+
           {user ? (
             <div className="flex items-center gap-2">
               <Link
-                to="/settings"
-                className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors"
+                to="/profile"
+                className="flex items-center gap-2 p-1.5 pr-3 rounded-full bg-slate-900 border border-slate-800 hover:border-slate-700 transition-colors group"
+                title="View your profile, stats and settings"
               >
-                <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center text-xs font-bold text-white">
-                  {user.name.charAt(0).toUpperCase()}
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-xs font-bold text-white shadow-sm">
+                  {user.name ? user.name.charAt(0).toUpperCase() : 'U'}
                 </div>
-                <span className="text-xs font-medium text-slate-300 hidden sm:inline">{user.name}</span>
+                <span className="text-xs font-medium text-slate-300 group-hover:text-white hidden sm:inline truncate max-w-[120px]">
+                  {user.name || 'Account'}
+                </span>
               </Link>
             </div>
           ) : (

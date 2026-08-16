@@ -1,9 +1,19 @@
 import { Router, Request, Response } from 'express';
 import { ScanRepository } from '@weblens/database';
 import { ScanService } from '../services/scanService.js';
+import { requireAuth } from '../middleware/auth.js';
 
 export function createAdminRouter(repo: ScanRepository, scanService: ScanService): Router {
   const router = Router();
+
+  // Admin routes require authentication and admin privileges
+  router.use(requireAuth);
+  router.use((req: Request, res: Response, next) => {
+    if (req.user?.role !== 'admin' && req.user?.email !== 'admin@weblens.dev') {
+      return res.status(403).json({ error: 'Forbidden: Administrator privileges required.' });
+    }
+    next();
+  });
 
   // GET /api/admin/stats
   router.get('/stats', (_req: Request, res: Response) => {

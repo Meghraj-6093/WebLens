@@ -1007,4 +1007,143 @@ export class ScanRepository {
     `);
     return stmt.all(limit) as any[];
   }
+
+  // ==========================================
+  // USER PROFILE, STATS & ACTIVITY
+  // ==========================================
+
+  getUserProfileStats(userId: string): any {
+    const totalScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE user_id = ?`).get(userId) as any)?.count || 0;
+    const completedScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE user_id = ? AND status = 'completed'`).get(userId) as any)?.count || 0;
+    const failedScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE user_id = ? AND status = 'failed'`).get(userId) as any)?.count || 0;
+    const avgScore = (this.db.prepare(`SELECT AVG(overall_score) as avg FROM scans WHERE user_id = ? AND status = 'completed' AND overall_score IS NOT NULL`).get(userId) as any)?.avg || 0;
+    const highestScore = (this.db.prepare(`SELECT MAX(overall_score) as max FROM scans WHERE user_id = ? AND status = 'completed' AND overall_score IS NOT NULL`).get(userId) as any)?.max || 0;
+    const lowestScore = (this.db.prepare(`SELECT MIN(overall_score) as min FROM scans WHERE user_id = ? AND status = 'completed' AND overall_score IS NOT NULL`).get(userId) as any)?.min || 0;
+    const uniqueDomains = (this.db.prepare(`SELECT COUNT(DISTINCT domain) as count FROM scans WHERE user_id = ?`).get(userId) as any)?.count || 0;
+    const projectsCount = (this.db.prepare(`SELECT COUNT(*) as count FROM projects WHERE user_id = ?`).get(userId) as any)?.count || 0;
+    const monitorsCount = (this.db.prepare(`SELECT COUNT(*) as count FROM monitored_sites WHERE user_id = ?`).get(userId) as any)?.count || 0;
+    const apiKeysCount = (this.db.prepare(`SELECT COUNT(*) as count FROM api_keys WHERE user_id = ?`).get(userId) as any)?.count || 0;
+    const savedReportsCount = (this.db.prepare(`SELECT COUNT(*) as count FROM reports r JOIN scans s ON r.scan_id = s.id WHERE s.user_id = ?`).get(userId) as any)?.count || 0;
+    const scansToday = this.getUsageToday(userId);
+
+    // Month and week calculations
+    const oneWeekAgo = new Date(Date.now() - 7 * 86400000).toISOString();
+    const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString();
+
+    const scansThisWeek = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE user_id = ? AND created_at >= ?`).get(userId, oneWeekAgo) as any)?.count || 0;
+    const scansThisMonth = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE user_id = ? AND created_at >= ?`).get(userId, startOfMonth) as any)?.count || 0;
+
+    return {
+      totalScans,
+      completedScans,
+      failedScans,
+      scansToday,
+      scansThisWeek,
+      scansThisMonth,
+      averageScore: Math.round(avgScore),
+      highestScore: highestScore > 0 ? highestScore : 0,
+      lowestScore: lowestScore > 0 ? lowestScore : 0,
+      uniqueDomains,
+      projectsCount,
+      monitorsCount,
+      apiKeysCount,
+      savedReportsCount
+    };
+  }
+
+  getUserRecentActivity(userId: string, limit: number = 15): any[] {
+    const activities: any[] = [];
+
+    // 1. Scans run by user
+    const scansStmt = this.db.prepare(`
+      SELECT id, domain, status, overall_score as overallScore, created_at as timestamp
+      FROM scans WHERE user_id = ? ORDER BY created_at DESC LIMIT 10
+    `);
+    const userScans = scansStmt.all(userId) as any[];
+    userScans.forEach((s) => {
+      activities.push({
+        id: `act_scan_${s.id}`,
+        type: 'scan',
+        title: `Audited website ${s.domain}`,
+        detail: s.status === 'completed' && s.overallScore !== null ? `Completed with health score ${s.overallScore}/100` : `Status: ${s.status}`,
+        timestamp: s.timestamp,
+        link: `/report/${s.id}`
+      });
+    });
+
+    // 2. Projects created by user
+    const projStmt = this.db.prepare(`
+      SELECT id, name, domain, created_at as timestamp
+      FROM projects WHERE user_id = ? ORDER BY created_at DESC LIMIT 5
+    `);
+    const userProjs = projStmt.all(userId) as any[];
+    userProjs.forEach((p) => {
+      activities.push({
+        id: `act_proj_${p.id}`,
+        type: 'project',
+        title: `Created Project Workspace "${p.name}"`,
+        detail: `Target domain: ${p.domain}`,
+        timestamp: p.timestamp,
+        link: `/projects`
+      });
+    });
+
+    // 3. Monitored sites
+    const monStmt = this.db.prepare(`
+      SELECT id, domain, frequency, created_at as timestamp
+      FROM monitored_sites WHERE user_id = ? ORDER BY created_at DESC LIMIT 5
+    `);
+    const userMons = monStmt.all(userId) as any[];
+    userMons.forEach((m) => {
+      activities.push({
+        id: `act_mon_${m.id}`,
+        type: 'monitor',
+        title: `Configured Continuous Monitoring for ${m.domain}`,
+        detail: `Scheduled frequency: ${m.frequency}`,
+        timestamp: m.timestamp,
+        link: `/monitoring`
+      });
+    });
+
+    // Sort chronologically descending
+    activities.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return activities.slice(0, limit);
+  }
+
+  updateUserProfile(userId: string, data: { name?: string; email?: string }): void {
+    if (data.name && data.email) {
+      this.db.prepare(`UPDATE users SET name = ?, email = ? WHERE id = ?`).run(data.name, data.email.toLowerCase(), userId);
+    } else if (data.name) {
+      this.db.prepare(`UPDATE users SET name = ? WHERE id = ?`).run(data.name, userId);
+    } else if (data.email) {
+      this.db.prepare(`UPDATE users SET email = ? WHERE id = ?`).run(data.email.toLowerCase(), userId);
+    }
+  }
+
+  updateUserTier(userId: string, tier: UserTier): void {
+    this.db.prepare(`UPDATE users SET tier = ? WHERE id = ?`).run(tier, userId);
+  }
+
+  deleteUserAccount(userId: string): void {
+    // Delete in sequence respecting dependencies
+    this.db.prepare(`DELETE FROM project_scans WHERE project_id IN (SELECT id FROM projects WHERE user_id = ?)`).run(userId);
+    this.db.prepare(`DELETE FROM projects WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM monitored_sites WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM alerts WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM webhook_destinations WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM api_keys WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM team_members WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM teams WHERE owner_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM clients WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM agency_settings WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM audit_results WHERE scan_id IN (SELECT id FROM scans WHERE user_id = ?)`).run(userId);
+    this.db.prepare(`DELETE FROM category_scores WHERE scan_id IN (SELECT id FROM scans WHERE user_id = ?)`).run(userId);
+    this.db.prepare(`DELETE FROM resources WHERE scan_id IN (SELECT id FROM scans WHERE user_id = ?)`).run(userId);
+    this.db.prepare(`DELETE FROM reports WHERE scan_id IN (SELECT id FROM scans WHERE user_id = ?)`).run(userId);
+    this.db.prepare(`DELETE FROM scans WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM password_reset_tokens WHERE user_id = ?`).run(userId);
+    this.db.prepare(`DELETE FROM usage_records WHERE identifier = ?`).run(userId);
+    this.db.prepare(`DELETE FROM users WHERE id = ?`).run(userId);
+  }
 }
+

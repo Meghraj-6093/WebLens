@@ -25,6 +25,10 @@ export class AuthService {
     return crypto.timingSafeEqual(Buffer.from(originalHash, 'hex'), Buffer.from(verifyHash, 'hex'));
   }
 
+  comparePassword(password: string, storedHash: string): boolean {
+    return this.verifyPassword(password, storedHash);
+  }
+
   // Generate lightweight signed token (base64url header.payload.signature)
   createToken(user: User): string {
     const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');

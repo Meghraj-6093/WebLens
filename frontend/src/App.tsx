@@ -39,6 +39,7 @@ export const App: React.FC = () => {
               <Route path="/developers" element={<ApiKeysPage />} />
               <Route path="/pricing" element={<BillingPage />} />
               <Route path="/admin" element={<AdminPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
               <Route path="/settings" element={<ProfilePage />} />
               <Route path="/scan/:id" element={<ScanProgressPage />} />
               <Route path="/report/:id" element={<ReportPage />} />

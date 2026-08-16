@@ -187,3 +187,46 @@ export async function getAiExplanation(issue: AuditResult): Promise<AIExplanatio
   if (!res.ok) throw new Error(data.error || 'Failed to generate AI diagnosis.');
   return data;
 }
+
+// --- User Profile & Account Settings APIs ---
+export async function getUserProfile(): Promise<any> {
+  const res = await fetch(`${API_BASE}/user/profile`, {
+    headers: getAuthHeaders(),
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Failed to load profile.');
+  return data;
+}
+
+export async function updateUserProfile(data: { name?: string; email?: string }): Promise<any> {
+  const res = await fetch(`${API_BASE}/user/profile`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  const resData = await res.json();
+  if (!res.ok) throw new Error(resData.error || 'Failed to update profile.');
+  return resData;
+}
+
+export async function changeUserPassword(data: { currentPassword: string; newPassword: string }): Promise<any> {
+  const res = await fetch(`${API_BASE}/user/password`, {
+    method: 'PUT',
+    headers: getAuthHeaders(),
+    body: JSON.stringify(data),
+  });
+  const resData = await res.json();
+  if (!res.ok) throw new Error(resData.error || 'Failed to change password.');
+  return resData;
+}
+
+export async function deleteUserAccount(): Promise<any> {
+  const res = await fetch(`${API_BASE}/user/account`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+  });
+  const resData = await res.json();
+  if (!res.ok) throw new Error(resData.error || 'Failed to delete account.');
+  return resData;
+}
+
