@@ -1,0 +1,15 @@
+{
+  "short_name": "WebLens",
+  "name": "WebLens — Instant Website Health & Audit Platform",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "32x32 48x48 72x72 96x96 128x128 256x256 512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#070B14",
+  "theme_color": "#070B14",
+  "display": "standalone"
+}
