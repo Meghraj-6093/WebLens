@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, ShieldCheck, Zap, Globe, Smartphone, Heart, Sparkles, Server, Swords, Building2 } from 'lucide-react';
+import { Activity, ShieldCheck, Zap, Globe, Smartphone, Heart, HardDrive, Lock } from 'lucide-react';
 
 export const Footer: React.FC = () => {
   return (
@@ -16,7 +16,7 @@ export const Footer: React.FC = () => {
               <span className="font-bold text-sm text-white">WebLens PRO</span>
             </div>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Instant, comprehensive website health diagnostics. Discover performance, SEO, accessibility, and security issues with actionable developer fixes.
+              Private, local-first website diagnostics. Discover performance, SEO, accessibility, and security issues with zero accounts or trackers.
             </p>
           </div>
 
@@ -31,34 +31,35 @@ export const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* Platform Solutions */}
+          {/* Platform Navigation */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">Platform Solutions</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">Local Workspace</h4>
             <ul className="space-y-2 text-xs text-slate-400">
               <li><Link to="/" className="hover:text-blue-400 transition-colors">Instant URL Scanner</Link></li>
-              <li><Link to="/demo" className="hover:text-blue-400 transition-colors">Interactive Demo Report</Link></li>
-              <li><Link to="/monitoring" className="hover:text-blue-400 transition-colors">Continuous Automated Monitoring</Link></li>
-              <li><Link to="/competitors" className="hover:text-blue-400 transition-colors">3-Way Competitor Benchmark</Link></li>
-              <li><Link to="/agency" className="hover:text-blue-400 transition-colors">Agency & White-Label Studio</Link></li>
-              <li><Link to="/developers" className="hover:text-blue-400 transition-colors">Developer Public REST API</Link></li>
+              <li><Link to="/dashboard" className="hover:text-blue-400 transition-colors">Local Dashboard</Link></li>
+              <li><Link to="/monitoring" className="hover:text-blue-400 transition-colors">Continuous Monitoring</Link></li>
+              <li><Link to="/competitors" className="hover:text-blue-400 transition-colors">3-Way Competitor Benchmarks</Link></li>
+              <li><Link to="/agency" className="hover:text-blue-400 transition-colors">Agency Studio & Workspaces</Link></li>
+              <li><Link to="/developers" className="hover:text-blue-400 transition-colors">Developer REST API</Link></li>
+              <li><Link to="/profile" className="hover:text-blue-400 transition-colors">Storage & Data Backup</Link></li>
             </ul>
           </div>
 
-          {/* Security & Reliability */}
+          {/* Privacy & Storage */}
           <div>
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">Security & Compliance</h4>
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300 mb-3">Private & Local-First</h4>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Safe, non-destructive scans on publicly accessible headers and DOM structures. Fully protected with strict multi-layer SSRF filtering.
+              Your audit history, workspaces, and reports are persisted directly in this browser's IndexedDB. No login or cloud database required.
             </p>
-            <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] font-mono text-emerald-400">
-              <ShieldCheck className="w-3 h-3" /> Production Hardened
+            <div className="mt-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500/10 border border-blue-500/20 text-[11px] font-mono text-blue-400">
+              <Lock className="w-3 h-3 text-emerald-400" /> 100% Client-Side Privacy
             </div>
           </div>
         </div>
 
         <div className="border-t border-slate-800/80 pt-6 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-4">
           <div>
-            &copy; {new Date().getFullYear()} WebLens. Built for developers, designers, and web creators.
+            &copy; {new Date().getFullYear()} WebLens. Built for developers, designers, and privacy-conscious web creators.
           </div>
           <div className="flex items-center gap-1">
             Engineered with <Heart className="w-3 h-3 text-rose-500 inline fill-rose-500" /> for open web quality

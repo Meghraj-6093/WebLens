@@ -122,6 +122,13 @@ export function useScanEvents(scanId: string | undefined) {
         eventSource?.close();
         startPollingFallback();
       };
+
+      // Also start polling after 2s if no SSE events delivered
+      setTimeout(() => {
+        if (!isFinished) {
+          startPollingFallback();
+        }
+      }, 2000);
     } catch {
       startPollingFallback();
     }

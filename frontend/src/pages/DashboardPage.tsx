@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.js';
-import { getProjects, getScanHistory, startScan } from '../lib/api.js';
+import { startScan } from '../lib/api.js';
+import { LocalWorkspaceDB } from '../lib/db.js';
 import { ProjectSummary, HistoricalScanItem } from '@weblens/shared';
 import { Button } from '../components/ui/Button.js';
 import { 
@@ -13,44 +13,61 @@ import {
   ArrowDownRight, 
   Sparkles, 
   TrendingUp, 
-  ShieldCheck, 
   Clock, 
-  Zap, 
-  ChevronRight,
-  ExternalLink,
-  GitCompare,
-  Plus
+  HardDrive,
+  Plus,
+  Lock
 } from 'lucide-react';
 import { formatDate, cn } from '../lib/utils.js';
 
 export const DashboardPage: React.FC = () => {
-  const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
   const [history, setHistory] = useState<HistoricalScanItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [stats, setStats] = useState<{
+    totalScans: number;
+    scansToday: number;
+    averageScore: number;
+    highestScore: number;
+    uniqueDomains: number;
+    projectsCount: number;
+    monitorsCount: number;
+  }>({
+    totalScans: 0,
+    scansToday: 0,
+    averageScore: 0,
+    highestScore: 0,
+    uniqueDomains: 0,
+    projectsCount: 0,
+    monitorsCount: 0
+  });
 
+  const [isLoading, setIsLoading] = useState(true);
   const [newScanUrl, setNewScanUrl] = useState('');
   const [isScanning, setIsScanning] = useState(false);
 
-  useEffect(() => {
-    const loadDashboardData = async () => {
-      setIsLoading(true);
-      try {
-        const [projData, histData] = await Promise.all([
-          getProjects().catch(() => []),
-          getScanHistory().catch(() => []),
-        ]);
-        setProjects(projData);
-        setHistory(histData);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const loadLocalData = async () => {
+    setIsLoading(true);
+    try {
+      const [allScans, allProjects, workspaceStats] = await Promise.all([
+        LocalWorkspaceDB.getAllScans(),
+        LocalWorkspaceDB.getProjects(),
+        LocalWorkspaceDB.getWorkspaceStats()
+      ]);
+      setHistory(allScans);
+      setProjects(allProjects);
+      setStats(workspaceStats);
+    } catch (err) {
+      console.error('Failed to load local workspace data', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    loadDashboardData();
-  }, [user]);
+  useEffect(() => {
+    loadLocalData();
+  }, []);
 
   const handleQuickScan = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -65,28 +82,21 @@ export const DashboardPage: React.FC = () => {
     }
   };
 
-  // Calculations
-  const completedScans = history.filter((h) => h.status === 'completed' && h.overallScore !== null);
-  const totalScansCount = completedScans.length;
-  const avgScore = totalScansCount > 0
-    ? Math.round(completedScans.reduce((acc, curr) => acc + (curr.overallScore || 0), 0) / totalScansCount)
-    : 0;
-  const bestScore = totalScansCount > 0
-    ? Math.max(...completedScans.map((h) => h.overallScore || 0))
-    : 0;
-
-  const usagePercent = user ? Math.round((user.scansToday / user.maxScansPerDay) * 100) : 30;
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            {user ? `Welcome back, ${user.name}` : 'WebLens Developer Dashboard'}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+              WebLens Local Dashboard
+            </h1>
+            <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-400 border border-blue-500/20">
+              <Lock className="w-3 h-3 text-emerald-400" /> Local-First
+            </span>
+          </div>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Track website audits, monitor regressions across projects, and discover actionable AI fixes.
+            Track website audits, monitor regressions across projects, and discover actionable fixes — persisted locally in this browser.
           </p>
         </div>
 
@@ -108,17 +118,17 @@ export const DashboardPage: React.FC = () => {
         </form>
       </div>
 
-      {/* 1. High-Level Metric Cards */}
+      {/* 1. Real Local Workspace Metrics */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card-glow rounded-2xl p-5 border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold">Total Audits</span>
+            <span className="text-xs font-semibold">Saved Audits</span>
             <Activity className="w-4 h-4 text-blue-400" />
           </div>
           <div className="text-3xl font-extrabold text-white font-mono tracking-tight">
-            {totalScansCount}
+            {stats.totalScans}
           </div>
-          <div className="text-[11px] text-slate-500">Across all monitored targets</div>
+          <div className="text-[11px] text-slate-500">{stats.uniqueDomains} unique domains</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-slate-800 space-y-2">
@@ -127,33 +137,31 @@ export const DashboardPage: React.FC = () => {
             <TrendingUp className="w-4 h-4 text-emerald-400" />
           </div>
           <div className="text-3xl font-extrabold text-emerald-400 font-mono tracking-tight">
-            {avgScore > 0 ? `${avgScore}/100` : '—'}
+            {stats.averageScore > 0 ? `${stats.averageScore}/100` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">Calculated across 6 categories</div>
+          <div className="text-[11px] text-slate-500">Across your saved audits</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold">Best Score Recorded</span>
+            <span className="text-xs font-semibold">Peak Score</span>
             <Sparkles className="w-4 h-4 text-amber-400" />
           </div>
           <div className="text-3xl font-extrabold text-amber-400 font-mono tracking-tight">
-            {bestScore > 0 ? `${bestScore}/100` : '—'}
+            {stats.highestScore > 0 ? `${stats.highestScore}/100` : '—'}
           </div>
-          <div className="text-[11px] text-slate-500">Peak performance benchmark</div>
+          <div className="text-[11px] text-slate-500">Highest recorded score</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-slate-800 space-y-2">
           <div className="flex items-center justify-between text-slate-400">
-            <span className="text-xs font-semibold">Daily Usage Quota</span>
-            <Zap className="w-4 h-4 text-purple-400" />
+            <span className="text-xs font-semibold">Browser Storage</span>
+            <HardDrive className="w-4 h-4 text-purple-400" />
           </div>
-          <div className="text-2xl font-bold text-white font-mono tracking-tight">
-            {user ? `${user.scansToday} / ${user.maxScansPerDay}` : '3 / 3 (Anon)'}
+          <div className="text-xl font-bold text-white font-mono tracking-tight">
+            {stats.projectsCount} Proj • {stats.monitorsCount} Mon
           </div>
-          <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden border border-slate-800">
-            <div className="bg-blue-500 h-full rounded-full" style={{ width: `${Math.min(100, usagePercent)}%` }} />
-          </div>
+          <div className="text-[11px] text-slate-500">Stored in IndexedDB</div>
         </div>
       </div>
 
@@ -163,7 +171,7 @@ export const DashboardPage: React.FC = () => {
           <div className="space-y-0.5">
             <h2 className="text-base font-bold text-white tracking-tight flex items-center gap-2">
               <Layers className="w-4 h-4 text-blue-400" />
-              <span>Project Workspaces</span>
+              <span>Local Workspaces ({projects.length})</span>
             </h2>
             <p className="text-xs text-slate-400">Organize client sites, personal portfolios, and web apps.</p>
           </div>
@@ -171,10 +179,7 @@ export const DashboardPage: React.FC = () => {
           <Button
             size="sm"
             variant="outline"
-            onClick={() => {
-              if (!user) openAuthModal('register');
-              else navigate('/projects');
-            }}
+            onClick={() => navigate('/projects')}
             leftIcon={<Plus className="w-3.5 h-3.5" />}
           >
             New Project
@@ -226,15 +231,12 @@ export const DashboardPage: React.FC = () => {
             <FolderPlus className="w-8 h-8 text-slate-500 mx-auto" />
             <h3 className="text-sm font-bold text-white">Create your first Project Workspace</h3>
             <p className="text-xs text-slate-400 max-w-sm mx-auto">
-              Keep a dedicated audit history for your portfolio or client websites and detect score drops over time.
+              Group related scans and track historical health improvements over time in your local workspace.
             </p>
             <Button
               size="sm"
               variant="primary"
-              onClick={() => {
-                if (!user) openAuthModal('register');
-                else navigate('/projects');
-              }}
+              onClick={() => navigate('/projects')}
             >
               Create Workspace
             </Button>
@@ -313,8 +315,17 @@ export const DashboardPage: React.FC = () => {
                 ))}
                 {history.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-5 py-8 text-center text-slate-500">
-                      No scans executed yet. Run your first audit above!
+                    <td colSpan={5} className="px-5 py-10 text-center text-slate-500 font-sans">
+                      <div className="max-w-xs mx-auto space-y-2">
+                        <Activity className="w-8 h-8 text-slate-600 mx-auto" />
+                        <div className="font-bold text-white text-sm">No Scans Yet</div>
+                        <p className="text-xs text-slate-400">Analyze your first website to start building your local audit history.</p>
+                        <div className="pt-2">
+                          <Button size="sm" variant="primary" onClick={() => navigate('/')}>
+                            Analyze Website
+                          </Button>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 )}

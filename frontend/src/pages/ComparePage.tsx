@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { compareScans, getScanHistory } from '../lib/api.js';
+import { compareScans } from '../lib/api.js';
+import { LocalWorkspaceDB } from '../lib/db.js';
 import { ComparisonReport, AuditCategory, HistoricalScanItem } from '@weblens/shared';
 import { Button } from '../components/ui/Button.js';
 import { IssueCard } from '../components/report/IssueCard.js';
@@ -35,7 +36,7 @@ export const ComparePage: React.FC = () => {
   const [selectedId2, setSelectedId2] = useState<string>(id2 || '');
 
   useEffect(() => {
-    getScanHistory().then((data) => {
+    LocalWorkspaceDB.getAllScans().then((data) => {
       setAllScans(data);
       if (!id1 && data.length >= 2) {
         setSelectedId1(data[1].id);

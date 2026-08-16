@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { FullScanReport, AuditCategory, AuditResult } from '@weblens/shared';
-import { getScanReport, getDemoReport } from '../lib/api.js';
+import { getScanReport } from '../lib/api.js';
 import { OverallScoreCard } from '../components/report/OverallScoreCard.js';
 import { CategoryScoreCards } from '../components/report/CategoryScoreCards.js';
 import { IssueFilter, SeverityFilterType } from '../components/report/IssueFilter.js';
@@ -23,10 +23,7 @@ import {
   Smartphone, 
   CheckCircle2, 
   FileText, 
-  AlertCircle,
-  RotateCw,
-  Search,
-  Calculator
+  AlertCircle
 } from 'lucide-react';
 import { cn } from '../lib/utils.js';
 
@@ -34,10 +31,7 @@ export type ReportTab = 'overview' | 'issues' | 'performance' | 'seo' | 'accessi
 
 export const ReportPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const location = useLocation();
   const navigate = useNavigate();
-
-  const isDemoMode = location.pathname === '/demo';
 
   const [report, setReport] = useState<FullScanReport | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,16 +45,17 @@ export const ReportPage: React.FC = () => {
   const [breakdownModalCategory, setBreakdownModalCategory] = useState<AuditCategory | 'overall'>('overall');
 
   const loadReport = async () => {
+    if (!id) {
+      setError('Invalid report identifier.');
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setError(null);
     try {
-      if (isDemoMode) {
-        const data = await getDemoReport();
-        setReport(data);
-      } else if (id) {
-        const data = await getScanReport(id);
-        setReport(data);
-      }
+      const data = await getScanReport(id);
+      setReport(data);
     } catch (err: any) {
       setError(err.message || 'Failed to load audit results.');
     } finally {
@@ -70,7 +65,7 @@ export const ReportPage: React.FC = () => {
 
   useEffect(() => {
     loadReport();
-  }, [id, isDemoMode]);
+  }, [id]);
 
   if (isLoading) {
     return (
@@ -93,7 +88,7 @@ export const ReportPage: React.FC = () => {
           <AlertCircle className="w-7 h-7" />
         </div>
         <h2 className="text-xl font-bold text-white">Unable to Display Report</h2>
-        <p className="text-sm text-slate-400">{error || 'Report not found or has expired.'}</p>
+        <p className="text-sm text-slate-400">{error || 'Report not found in local workspace or remote server.'}</p>
         <Button onClick={() => navigate('/')} variant="primary" size="sm">
           Run a New Scan
         </Button>
@@ -161,23 +156,7 @@ export const ReportPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Demo Mode Notice */}
-      {isDemoMode && (
-        <div className="p-3.5 rounded-2xl bg-blue-500/10 border border-blue-500/30 text-blue-300 text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-400 shrink-0" />
-            <span><strong>Interactive Demo Report:</strong> Live preview of a complete WebLens health audit on <code>demo.weblens.app</code>.</span>
-          </span>
-          <button
-            onClick={() => navigate('/')}
-            className="text-xs font-semibold underline hover:text-white shrink-0"
-          >
-            Audit Your Own URL →
-          </button>
-        </div>
-      )}
-
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* 1. Overall Score Banner */}
       <OverallScoreCard report={report} onRescan={() => navigate('/')} />
 

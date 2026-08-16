@@ -1,26 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.js';
-import { getProjects, createProject, startScan } from '../lib/api.js';
+import { LocalWorkspaceDB } from '../lib/db.js';
+import { startScan } from '../lib/api.js';
 import { ProjectSummary } from '@weblens/shared';
 import { Button } from '../components/ui/Button.js';
 import { 
   Layers, 
   Plus, 
   Globe, 
-  Calendar, 
   RotateCw, 
   ArrowUpRight, 
   ArrowDownRight, 
   X, 
-  Sparkles, 
-  AlertCircle,
-  ExternalLink 
+  Trash2,
+  AlertCircle
 } from 'lucide-react';
-import { formatDate, cn } from '../lib/utils.js';
+import { cn } from '../lib/utils.js';
 
 export const ProjectsPage: React.FC = () => {
-  const { user, openAuthModal } = useAuth();
   const navigate = useNavigate();
 
   const [projects, setProjects] = useState<ProjectSummary[]>([]);
@@ -36,7 +33,7 @@ export const ProjectsPage: React.FC = () => {
   const loadProjects = async () => {
     setIsLoading(true);
     try {
-      const data = await getProjects();
+      const data = await LocalWorkspaceDB.getProjects();
       setProjects(data);
     } catch {
       setProjects([]);
@@ -46,12 +43,8 @@ export const ProjectsPage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (user) {
-      loadProjects();
-    } else {
-      setIsLoading(false);
-    }
-  }, [user]);
+    loadProjects();
+  }, []);
 
   const handleCreateProject = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,7 +53,7 @@ export const ProjectsPage: React.FC = () => {
     setIsSubmitting(true);
     setModalError(null);
     try {
-      await createProject({ name, domain, description });
+      await LocalWorkspaceDB.saveProject({ name, domain, description });
       setIsModalOpen(false);
       setName('');
       setDomain('');
@@ -73,6 +66,13 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
+  const handleDeleteProject = async (id: string, name: string) => {
+    if (window.confirm(`Delete workspace "${name}"?`)) {
+      await LocalWorkspaceDB.deleteProject(id);
+      await loadProjects();
+    }
+  };
+
   const handleRunProjectScan = async (projectDomain: string) => {
     try {
       const res = await startScan(projectDomain);
@@ -82,36 +82,17 @@ export const ProjectsPage: React.FC = () => {
     }
   };
 
-  if (!user) {
-    return (
-      <div className="max-w-xl mx-auto px-4 py-20 text-center space-y-4">
-        <div className="w-14 h-14 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20 flex items-center justify-center mx-auto">
-          <Layers className="w-7 h-7" />
-        </div>
-        <h2 className="text-2xl font-bold text-white">Project Workspaces</h2>
-        <p className="text-xs sm:text-sm text-slate-400">
-          Sign in or create an account to group target websites, track regression trends, and configure automatic audit schedules.
-        </p>
-        <div className="pt-2">
-          <Button onClick={() => openAuthModal('register')} size="md" variant="primary">
-            Create Free Account
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
             <Layers className="w-7 h-7 text-blue-400" />
-            <span>Project Workspaces</span>
+            <span>Local Workspaces</span>
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Group your client domains, personal portfolios, and web apps into separate audit workspaces.
+            Organize target websites into local workspaces to monitor regressions and historical scores.
           </p>
         </div>
 
@@ -121,7 +102,7 @@ export const ProjectsPage: React.FC = () => {
           onClick={() => setIsModalOpen(true)}
           leftIcon={<Plus className="w-3.5 h-3.5" />}
         >
-          Add New Project
+          Add Workspace
         </Button>
       </div>
 
@@ -144,15 +125,24 @@ export const ProjectsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {p.scoreChange !== null && (
-                  <span className={cn(
-                    'text-xs font-bold font-mono px-2 py-0.5 rounded-full flex items-center gap-0.5 shrink-0',
-                    p.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
-                  )}>
-                    {p.scoreChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
-                    {p.scoreChange > 0 ? `+${p.scoreChange}` : p.scoreChange}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {p.scoreChange !== null && (
+                    <span className={cn(
+                      'text-xs font-bold font-mono px-2 py-0.5 rounded-full flex items-center gap-0.5 shrink-0',
+                      p.scoreChange >= 0 ? 'bg-emerald-500/10 text-emerald-400' : 'bg-rose-500/10 text-rose-400'
+                    )}>
+                      {p.scoreChange >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                      {p.scoreChange > 0 ? `+${p.scoreChange}` : p.scoreChange}
+                    </span>
+                  )}
+                  <button
+                    onClick={() => handleDeleteProject(p.id, p.name)}
+                    title="Delete workspace"
+                    className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
               </div>
 
               {p.description && (
@@ -194,7 +184,7 @@ export const ProjectsPage: React.FC = () => {
                   variant="ghost"
                   size="sm"
                   onClick={() => navigate(`/report/${p.latestScan!.id}`)}
-                  className="shrink-0 text-xs"
+                  className="shrink-0 text-xs text-blue-400 hover:text-blue-300"
                 >
                   Report →
                 </Button>
@@ -209,12 +199,12 @@ export const ProjectsPage: React.FC = () => {
           <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto">
             <Layers className="w-6 h-6" />
           </div>
-          <h3 className="text-base font-bold text-white">No Project Workspaces Yet</h3>
+          <h3 className="text-base font-bold text-white">No Workspaces Yet</h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Create your first workspace to keep historical score progression and delta insights for your website.
+            Create your first workspace to group client domains, personal portfolios, and web apps.
           </p>
           <Button size="sm" variant="primary" onClick={() => setIsModalOpen(true)}>
-            Create Project
+            Create Workspace
           </Button>
         </div>
       )}
@@ -231,19 +221,19 @@ export const ProjectsPage: React.FC = () => {
             </button>
 
             <div className="space-y-1">
-              <h3 className="text-lg font-bold text-white tracking-tight">Create Project Workspace</h3>
+              <h3 className="text-lg font-bold text-white tracking-tight">Create Local Workspace</h3>
               <p className="text-xs text-slate-400">Add a website domain to track its health over time.</p>
             </div>
 
             <form onSubmit={handleCreateProject} className="space-y-4 text-xs">
               <div className="space-y-1">
-                <label className="font-medium text-slate-300">Project Name</label>
+                <label className="font-medium text-slate-300">Workspace Name</label>
                 <input
                   type="text"
                   required
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  placeholder="Client Portfolio or Startup Landing"
+                  placeholder="e.g. Client Portfolio or Marketing Site"
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500"
                 />
               </div>
@@ -266,7 +256,7 @@ export const ProjectsPage: React.FC = () => {
                   rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="E-commerce store or marketing website"
+                  placeholder="Notes about this project"
                   className="w-full bg-slate-900 border border-slate-800 rounded-xl px-3 py-2 text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 resize-none"
                 />
               </div>

@@ -1,32 +1,33 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
   Activity, 
   Plus, 
-  Bell, 
   Trash2, 
   ExternalLink, 
-  TrendingDown, 
-  TrendingUp, 
   ShieldAlert, 
   Webhook, 
   Clock, 
   CheckCircle2, 
-  AlertTriangle 
+  RotateCw,
+  Info,
+  Lock
 } from 'lucide-react';
-import { useAuth } from '../context/AuthContext.js';
+import { LocalWorkspaceDB } from '../lib/db.js';
+import { startScan } from '../lib/api.js';
 import { Button } from '../components/ui/Button.js';
 import { Input } from '../components/ui/Input.js';
-import { Badge } from '../components/ui/Badge.js';
-import { MonitoredSite, ChangeAlert, WebhookDestination } from '@weblens/shared';
+import { MonitoredSite } from '@weblens/shared';
+import { formatDate } from '../lib/utils.js';
 
 export const MonitoringPage: React.FC = () => {
-  const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<'sites' | 'alerts' | 'webhooks'>('sites');
+  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'sites' | 'webhooks'>('sites');
   
   const [sites, setSites] = useState<MonitoredSite[]>([]);
-  const [alerts, setAlerts] = useState<ChangeAlert[]>([]);
-  const [webhooks, setWebhooks] = useState<WebhookDestination[]>([]);
+  const [webhooks, setWebhooks] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [scanningId, setScanningId] = useState<string | null>(null);
 
   // Form states
   const [newUrl, setNewUrl] = useState<string>('');
@@ -38,95 +39,81 @@ export const MonitoringPage: React.FC = () => {
   const [webhookUrl, setWebhookUrl] = useState<string>('');
   const [isAddingWebhook, setIsAddingWebhook] = useState<boolean>(false);
 
-  const token = localStorage.getItem('weblens_token');
-
-  const fetchData = async () => {
-    if (!token) return;
+  const loadData = async () => {
     setIsLoading(true);
     try {
-      const [sitesRes, alertsRes, webhooksRes] = await Promise.all([
-        fetch('http://localhost:3001/api/monitoring/sites', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:3001/api/monitoring/alerts', { headers: { Authorization: `Bearer ${token}` } }),
-        fetch('http://localhost:3001/api/monitoring/webhooks', { headers: { Authorization: `Bearer ${token}` } }),
-      ]);
-
-      if (sitesRes.ok) setSites(await sitesRes.json());
-      if (alertsRes.ok) setAlerts(await alertsRes.json());
-      if (webhooksRes.ok) setWebhooks(await webhooksRes.json());
+      const monitorList = await LocalWorkspaceDB.getMonitors();
+      setSites(monitorList);
     } catch (err) {
-      console.error('Failed to fetch monitoring data', err);
+      console.error('Failed to load local monitors', err);
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchData();
-  }, [user]);
+    loadData();
+  }, []);
 
   const handleAddSite = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newUrl || !token) return;
+    if (!newUrl) return;
 
     try {
-      const res = await fetch('http://localhost:3001/api/monitoring/sites', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ url: newUrl, frequency: newFrequency })
-      });
-      if (res.ok) {
-        setNewUrl('');
-        setIsAddingSite(false);
-        fetchData();
-      }
+      await LocalWorkspaceDB.saveMonitor({ url: newUrl, frequency: newFrequency });
+      setNewUrl('');
+      setIsAddingSite(false);
+      await loadData();
     } catch (err) {
-      console.error('Failed to add site', err);
+      console.error('Failed to add monitor', err);
     }
   };
 
-  const handleDeleteSite = async (id: string) => {
-    if (!token) return;
-    await fetch(`http://localhost:3001/api/monitoring/sites/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchData();
+  const handleDeleteSite = async (id: string, domain: string) => {
+    if (window.confirm(`Remove continuous monitoring for ${domain}?`)) {
+      await LocalWorkspaceDB.deleteMonitor(id);
+      await loadData();
+    }
   };
 
-  const handleAddWebhook = async (e: React.FormEvent) => {
+  const handleTriggerScan = async (domain: string, id: string) => {
+    setScanningId(id);
+    try {
+      const res = await startScan(domain);
+      navigate(`/scan/${res.scanId}`);
+    } catch (err: any) {
+      alert(err.message || 'Failed to trigger scan.');
+      setScanningId(null);
+    }
+  };
+
+  const handleAddWebhook = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!webhookName || !webhookUrl || !token) return;
+    if (!webhookName || !webhookUrl) return;
 
-    try {
-      const res = await fetch('http://localhost:3001/api/monitoring/webhooks', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ name: webhookName, type: webhookType, url: webhookUrl })
-      });
-      if (res.ok) {
-        setWebhookName('');
-        setWebhookUrl('');
-        setIsAddingWebhook(false);
-        fetchData();
-      }
-    } catch (err) {
-      console.error('Failed to add webhook', err);
-    }
+    const newHook = {
+      id: `wh_${Date.now()}`,
+      name: webhookName,
+      type: webhookType,
+      url: webhookUrl,
+      createdAt: new Date().toISOString()
+    };
+
+    const updated = [...webhooks, newHook];
+    setWebhooks(updated);
+    setWebhookName('');
+    setWebhookUrl('');
+    setIsAddingWebhook(false);
   };
 
-  const handleDeleteWebhook = async (id: string) => {
-    if (!token) return;
-    await fetch(`http://localhost:3001/api/monitoring/webhooks/${id}`, {
-      method: 'DELETE',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    fetchData();
+  const handleDeleteWebhook = (id: string) => {
+    setWebhooks(webhooks.filter(w => w.id !== id));
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800/80 pb-6">
         <div>
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
@@ -135,7 +122,7 @@ export const MonitoringPage: React.FC = () => {
             <h1 className="text-2xl font-black text-white tracking-tight">Continuous Monitoring</h1>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Automated scheduled audits, regression alerts, and webhook notifications.
+            Automated scheduled audits, regression tracking, and local change detection.
           </p>
         </div>
 
@@ -147,17 +134,19 @@ export const MonitoringPage: React.FC = () => {
             Monitored Sites ({sites.length})
           </button>
           <button
-            onClick={() => setActiveTab('alerts')}
-            className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === 'alerts' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
-          >
-            Regression Alerts ({alerts.length})
-          </button>
-          <button
             onClick={() => setActiveTab('webhooks')}
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition ${activeTab === 'webhooks' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:text-white'}`}
           >
-            Webhooks & Slack ({webhooks.length})
+            Alert Webhooks ({webhooks.length})
           </button>
+        </div>
+      </div>
+
+      {/* Local-First Architecture Information Alert */}
+      <div className="p-4 rounded-2xl bg-blue-950/20 border border-blue-500/30 text-xs text-slate-300 flex items-start gap-3">
+        <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+        <div>
+          <strong className="text-white">Browser-Assisted Monitoring:</strong> Monitor schedules are saved directly to this workstation. When WebLens is open, audits automatically run according to your configured frequency, keeping all historical regression data strictly private in your browser.
         </div>
       </div>
 
@@ -165,7 +154,7 @@ export const MonitoringPage: React.FC = () => {
       {activeTab === 'sites' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Active Monitor Schedules</h2>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Monitoring Schedules</h2>
             <Button size="sm" variant="primary" onClick={() => setIsAddingSite(!isAddingSite)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
               Add Website
             </Button>
@@ -198,7 +187,7 @@ export const MonitoringPage: React.FC = () => {
               </div>
               <div className="flex justify-end gap-2">
                 <Button size="sm" variant="ghost" type="button" onClick={() => setIsAddingSite(false)}>Cancel</Button>
-                <Button size="sm" variant="primary" type="submit">Start Monitoring</Button>
+                <Button size="sm" variant="primary" type="submit">Save Monitor</Button>
               </div>
             </form>
           )}
@@ -215,7 +204,7 @@ export const MonitoringPage: React.FC = () => {
                   <th className="p-4 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60">
+              <tbody className="divide-y divide-slate-800/60 font-mono">
                 {sites.map((s) => (
                   <tr key={s.id} className="hover:bg-slate-900/30 transition">
                     <td className="p-4">
@@ -238,7 +227,7 @@ export const MonitoringPage: React.FC = () => {
                           <span className="font-bold text-white font-mono text-sm">{s.lastScore}/100</span>
                         </div>
                       ) : (
-                        <span className="text-slate-500 italic">Pending first run</span>
+                        <span className="text-slate-500 italic">Pending audit</span>
                       )}
                     </td>
                     <td className="p-4 text-slate-400 font-mono text-[11px]">
@@ -247,19 +236,28 @@ export const MonitoringPage: React.FC = () => {
                         {new Date(s.nextScanAt).toLocaleDateString()} {new Date(s.nextScanAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="p-4 text-right font-sans space-x-1.5">
                       <button
-                        onClick={() => handleDeleteSite(s.id)}
+                        onClick={() => handleTriggerScan(s.domain, s.id)}
+                        disabled={scanningId === s.id}
+                        title="Run audit now"
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-400 hover:bg-blue-500/20 transition"
+                      >
+                        {scanningId === s.id ? 'Scanning...' : 'Scan Now'}
+                      </button>
+                      <button
+                        onClick={() => handleDeleteSite(s.id, s.domain)}
+                        title="Delete monitor"
                         className="p-1.5 rounded-lg text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3.5 h-3.5" />
                       </button>
                     </td>
                   </tr>
                 ))}
                 {sites.length === 0 && !isLoading && (
                   <tr>
-                    <td colSpan={5} className="p-10 text-center text-slate-500">
+                    <td colSpan={5} className="p-10 text-center text-slate-500 font-sans">
                       No websites are currently scheduled for continuous monitoring. Add a website above!
                     </td>
                   </tr>
@@ -270,45 +268,11 @@ export const MonitoringPage: React.FC = () => {
         </div>
       )}
 
-      {/* Tab 2: Regression Alerts */}
-      {activeTab === 'alerts' && (
-        <div className="space-y-4">
-          <h2 className="text-sm font-bold text-white uppercase tracking-wider">Change & Regression Log</h2>
-          <div className="space-y-3">
-            {alerts.map((a) => (
-              <div key={a.id} className="card-glow p-4 rounded-xl border border-slate-800 flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${a.severity === 'critical' ? 'bg-rose-500/10 text-rose-400' : 'bg-amber-500/10 text-amber-400'}`}>
-                    <ShieldAlert className="w-4 h-4" />
-                  </div>
-                  <div className="space-y-1">
-                    <div className="text-xs font-bold text-white flex items-center gap-2">
-                      <span>{a.title}</span>
-                      <span className="text-[10px] uppercase font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">{a.channel}</span>
-                    </div>
-                    <p className="text-xs text-slate-400">{a.message}</p>
-                  </div>
-                </div>
-                <div className="text-[11px] text-slate-500 font-mono whitespace-nowrap">
-                  {new Date(a.sentAt).toLocaleString()}
-                </div>
-              </div>
-            ))}
-            {alerts.length === 0 && (
-              <div className="card-glow p-12 text-center text-slate-500 rounded-2xl border border-slate-800">
-                <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-400 mb-2 opacity-80" />
-                No regression alerts recorded. All monitored websites are stable!
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Tab 3: Webhooks */}
+      {/* Tab 2: Webhooks */}
       {activeTab === 'webhooks' && (
         <div className="space-y-6">
           <div className="flex justify-between items-center">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Alert Webhook Endpoints</h2>
+            <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Alert Webhook Endpoints</h2>
             <Button size="sm" variant="primary" onClick={() => setIsAddingWebhook(!isAddingWebhook)} leftIcon={<Plus className="w-3.5 h-3.5" />}>
               Add Webhook
             </Button>
@@ -373,6 +337,13 @@ export const MonitoringPage: React.FC = () => {
                 </button>
               </div>
             ))}
+
+            {webhooks.length === 0 && (
+              <div className="col-span-2 card-glow p-8 text-center text-slate-500 rounded-2xl border border-slate-800">
+                <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-400 mb-2 opacity-80" />
+                No custom webhooks configured. Configure Slack or Discord webhooks above for real-time alerts.
+              </div>
+            )}
           </div>
         </div>
       )}

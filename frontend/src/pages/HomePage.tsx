@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startScan } from '../lib/api.js';
 import { Button } from '../components/ui/Button.js';
-import { ScoreGauge } from '../components/ui/ScoreGauge.js';
 import { 
   Search, 
   Sparkles, 
@@ -13,13 +12,8 @@ import {
   CheckCircle2, 
   ArrowRight, 
   Lock, 
-  Activity,
   AlertCircle,
-  BarChart3,
-  Layers,
-  ChevronRight,
-  ShieldAlert,
-  AlertTriangle
+  HardDrive
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -61,7 +55,7 @@ export const HomePage: React.FC = () => {
         {/* Capability Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold shadow-sm">
           <Sparkles className="w-3.5 h-3.5" />
-          <span>Instant Website Health Diagnostics • Lighthouse • SEO • A11y • Security</span>
+          <span>Local-First Website Diagnostics • Lighthouse • SEO • A11y • Security</span>
         </div>
 
         {/* Headline */}
@@ -70,7 +64,7 @@ export const HomePage: React.FC = () => {
             See what’s wrong with your website.
           </h1>
           <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Enter a URL and get a complete website health report covering performance, SEO, accessibility, security, and mobile readiness in one clear developer dashboard.
+            Enter any URL for a comprehensive technical health audit. Results and history are saved directly to your browser with zero accounts or trackers.
           </p>
         </div>
 
@@ -149,48 +143,40 @@ export const HomePage: React.FC = () => {
           ))}
         </div>
 
-        {/* Interactive Sample Report Preview Card */}
-        <div className="pt-10 max-w-4xl mx-auto">
+        {/* Local-First Architecture Feature Card */}
+        <div className="pt-8 max-w-4xl mx-auto">
           <div className="card-glow rounded-3xl p-6 sm:p-8 border border-slate-800 bg-gradient-to-b from-slate-900/90 to-[#080D18] shadow-2xl relative overflow-hidden text-left">
             <div className="flex flex-col md:flex-row items-center justify-between gap-8">
               <div className="space-y-4 max-w-lg">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-semibold">
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Live Sample Audit Preview</span>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-semibold">
+                  <Lock className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Private, Client-Side Workspace</span>
                 </div>
                 <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
-                  demo.weblens.app Technical Health Report
+                  Zero Sign-In. Stored in Your Browser.
                 </h3>
                 <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  WebLens analyzes Core Web Vitals, metadata, WCAG accessibility, SSL headers, and mobile viewport, transforming complex logs into step-by-step code fixes.
+                  WebLens gives you the depth of enterprise observability tooling without sending your history to third-party databases. Scans, workspaces, and benchmarks persist locally in your browser's IndexedDB.
                 </p>
                 <div className="flex flex-wrap items-center gap-2 pt-1 text-xs">
                   <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-                    4 Actionable Fixes
+                    Offline Report Viewing
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-                    30 Passed Checks
+                    JSON Data Export & Import
                   </span>
                   <span className="px-2.5 py-1 rounded-lg bg-slate-800 text-slate-300 border border-slate-700">
-                    Waterfall Chart
+                    SSRF Safe
                   </span>
-                </div>
-                <div className="pt-2">
-                  <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={() => navigate('/demo')}
-                    leftIcon={<Layers className="w-3.5 h-3.5" />}
-                    rightIcon={<ChevronRight className="w-3.5 h-3.5" />}
-                  >
-                    View Interactive Demo Report
-                  </Button>
                 </div>
               </div>
 
-              {/* Mini Gauge Representation */}
-              <div className="shrink-0 p-6 bg-slate-950/80 rounded-2xl border border-slate-800 flex flex-col items-center">
-                <ScoreGauge score={92} size="md" label="Overall Score" showRating={true} />
+              <div className="shrink-0 p-6 bg-slate-950/80 rounded-2xl border border-slate-800 flex flex-col items-center text-center space-y-2">
+                <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                  <HardDrive className="w-6 h-6" />
+                </div>
+                <div className="text-sm font-bold text-white">Browser Persistence</div>
+                <div className="text-xs text-slate-500 max-w-[140px]">IndexedDB Local Workspace</div>
               </div>
             </div>
           </div>
@@ -247,7 +233,7 @@ export const HomePage: React.FC = () => {
               See what your website is really like under the hood.
             </h3>
             <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto">
-              No signup required for your first audit. Run a comprehensive technical audit in seconds.
+              Run a comprehensive technical audit in seconds. No account or configuration required.
             </p>
             <div className="pt-2 flex justify-center">
               <Button
@@ -256,7 +242,7 @@ export const HomePage: React.FC = () => {
                 onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                 leftIcon={<Search className="w-4 h-4" />}
               >
-                Run Free Audit
+                Analyze Website Now
               </Button>
             </div>
           </div>

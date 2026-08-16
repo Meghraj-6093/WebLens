@@ -3,10 +3,6 @@ import {
   ScanStatusResponse, 
   FullScanReport,
   ShareReportResponse,
-  User,
-  RegisterRequest,
-  LoginRequest,
-  AuthResponse,
   ProjectRecord,
   ProjectSummary,
   HistoricalScanItem,
@@ -15,57 +11,15 @@ import {
   AIExplanation,
   AuditResult
 } from '@weblens/shared';
+import { LocalWorkspaceDB } from './db.js';
 
 const API_BASE = '/api';
-
-function getAuthHeaders(): Record<string, string> {
-  const token = localStorage.getItem('weblens_token');
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  };
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
-  }
-  return headers;
-}
-
-// --- Auth APIs ---
-export async function registerUser(data: RegisterRequest): Promise<AuthResponse> {
-  const res = await fetch(`${API_BASE}/auth/register`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Registration failed.');
-  return resData;
-}
-
-export async function loginUser(data: LoginRequest): Promise<AuthResponse> {
-  const res = await fetch(`${API_BASE}/auth/login`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Login failed.');
-  return resData;
-}
-
-export async function getMe(): Promise<{ user: User }> {
-  const res = await fetch(`${API_BASE}/auth/me`, {
-    headers: getAuthHeaders(),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Session expired.');
-  return resData;
-}
 
 // --- Scan APIs ---
 export async function startScan(url: string): Promise<CreateScanResponse> {
   const res = await fetch(`${API_BASE}/scans`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url }),
   });
 
@@ -87,27 +41,37 @@ export async function getScanStatus(scanId: string): Promise<ScanStatusResponse>
 }
 
 export async function getScanReport(scanId: string): Promise<FullScanReport> {
+  // 1. Try local IndexedDB first for fast offline recovery
+  try {
+    const localReport = await LocalWorkspaceDB.getReport(scanId);
+    if (localReport) {
+      return localReport;
+    }
+  } catch (err) {
+    console.warn('IndexedDB read failed, falling back to server fetch', err);
+  }
+
+  // 2. Fetch from backend scanner API
   const res = await fetch(`${API_BASE}/scans/${scanId}/results`);
   const data = await res.json();
   if (!res.ok) {
     throw new Error(data.error || 'Failed to load report.');
   }
-  return data;
-}
 
-export async function getDemoReport(): Promise<FullScanReport> {
-  const res = await fetch(`${API_BASE}/demo`);
-  const data = await res.json();
-  if (!res.ok) {
-    throw new Error(data.error || 'Failed to load demo report.');
+  // 3. Auto-persist to browser IndexedDB
+  try {
+    await LocalWorkspaceDB.saveScanReport(data);
+  } catch (err) {
+    console.warn('Failed to auto-save scan report to IndexedDB', err);
   }
+
   return data;
 }
 
 export async function createShareLink(scanId: string, options?: { visibility?: string; expiresDays?: number }): Promise<ShareReportResponse> {
   const res = await fetch(`${API_BASE}/reports`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ scanId, ...options }),
   });
 
@@ -127,60 +91,11 @@ export async function getSharedReport(token: string): Promise<FullScanReport> {
   return data;
 }
 
-// --- Projects APIs ---
-export async function getProjects(): Promise<ProjectSummary[]> {
-  const res = await fetch(`${API_BASE}/projects`, {
-    headers: getAuthHeaders(),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to fetch projects.');
-  return data;
-}
-
-export async function createProject(data: { name: string; domain: string; description?: string }): Promise<ProjectRecord> {
-  const res = await fetch(`${API_BASE}/projects`, {
-    method: 'POST',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Failed to create project.');
-  return resData;
-}
-
-// --- History & Comparison APIs ---
-export async function getScanHistory(): Promise<HistoricalScanItem[]> {
-  const res = await fetch(`${API_BASE}/history`, {
-    headers: getAuthHeaders(),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to fetch history.');
-  return data;
-}
-
-export async function compareScans(id1: string, id2: string): Promise<ComparisonReport> {
-  const res = await fetch(`${API_BASE}/history/compare/${id1}/${id2}`, {
-    headers: getAuthHeaders(),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Comparison failed.');
-  return data;
-}
-
-export async function getDomainTrends(domain: string): Promise<ScoreTrendPoint[]> {
-  const res = await fetch(`${API_BASE}/history/trends/${encodeURIComponent(domain)}`, {
-    headers: getAuthHeaders(),
-  });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to fetch trends.');
-  return data;
-}
-
 // --- AI Diagnostic APIs ---
 export async function getAiExplanation(issue: AuditResult): Promise<AIExplanation> {
   const res = await fetch(`${API_BASE}/ai/explain`, {
     method: 'POST',
-    headers: getAuthHeaders(),
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(issue),
   });
   const data = await res.json();
@@ -188,45 +103,68 @@ export async function getAiExplanation(issue: AuditResult): Promise<AIExplanatio
   return data;
 }
 
-// --- User Profile & Account Settings APIs ---
-export async function getUserProfile(): Promise<any> {
-  const res = await fetch(`${API_BASE}/user/profile`, {
-    headers: getAuthHeaders(),
+// --- Multi-Domain Competitor Benchmark API ---
+export async function compareCompetitorDomains(urls: string[]): Promise<any> {
+  const res = await fetch(`${API_BASE}/competitor/compare`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ urls }),
   });
   const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Failed to load profile.');
+  if (!res.ok) throw new Error(data.error || 'Competitor comparison failed.');
   return data;
 }
 
-export async function updateUserProfile(data: { name?: string; email?: string }): Promise<any> {
-  const res = await fetch(`${API_BASE}/user/profile`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Failed to update profile.');
-  return resData;
+// --- Historical Scan Comparison API ---
+export async function compareScans(id1: string, id2: string): Promise<ComparisonReport> {
+  const res = await fetch(`${API_BASE}/history/compare/${id1}/${id2}`);
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'Comparison failed.');
+  return data;
 }
 
-export async function changeUserPassword(data: { currentPassword: string; newPassword: string }): Promise<any> {
-  const res = await fetch(`${API_BASE}/user/password`, {
-    method: 'PUT',
-    headers: getAuthHeaders(),
-    body: JSON.stringify(data),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Failed to change password.');
-  return resData;
-}
+// --- API Test Console Runner ---
+export async function testApiEndpoint(
+  path: string, 
+  method: string = 'GET', 
+  body?: any, 
+  headers?: Record<string, string>
+): Promise<{ status: number; durationMs: number; data: any; headers: Record<string, string> }> {
+  const startTime = performance.now();
+  const reqHeaders: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...headers
+  };
 
-export async function deleteUserAccount(): Promise<any> {
-  const res = await fetch(`${API_BASE}/user/account`, {
-    method: 'DELETE',
-    headers: getAuthHeaders(),
-  });
-  const resData = await res.json();
-  if (!res.ok) throw new Error(resData.error || 'Failed to delete account.');
-  return resData;
-}
+  const options: RequestInit = {
+    method,
+    headers: reqHeaders
+  };
 
+  if (body && (method === 'POST' || method === 'PUT')) {
+    options.body = typeof body === 'string' ? body : JSON.stringify(body);
+  }
+
+  const res = await fetch(path, options);
+  const durationMs = Math.round(performance.now() - startTime);
+
+  let data: any;
+  const contentType = res.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    data = await res.json();
+  } else {
+    data = await res.text();
+  }
+
+  const resHeaders: Record<string, string> = {};
+  res.headers.forEach((value, key) => {
+    resHeaders[key] = value;
+  });
+
+  return {
+    status: res.status,
+    durationMs,
+    data,
+    headers: resHeaders
+  };
+}

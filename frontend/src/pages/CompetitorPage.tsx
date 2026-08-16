@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Swords, Trophy, Sparkles, ExternalLink, ArrowRight, ShieldCheck, Zap, Search, Eye, Smartphone, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Swords, Trophy, Sparkles, Zap, Search, Eye, ShieldCheck, Smartphone, CheckCircle, Clock, Trash2 } from 'lucide-react';
 import { Button } from '../components/ui/Button.js';
 import { Input } from '../components/ui/Input.js';
+import { LocalWorkspaceDB } from '../lib/db.js';
+import { compareCompetitorDomains } from '../lib/api.js';
 import { CompetitorComparisonResult, AuditCategory } from '@weblens/shared';
 
 export const CompetitorPage: React.FC = () => {
@@ -12,6 +14,20 @@ export const CompetitorPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [result, setResult] = useState<CompetitorComparisonResult | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [savedBenchmarks, setSavedBenchmarks] = useState<any[]>([]);
+
+  const loadSaved = async () => {
+    try {
+      const list = await LocalWorkspaceDB.getCompetitors();
+      setSavedBenchmarks(list);
+    } catch {
+      setSavedBenchmarks([]);
+    }
+  };
+
+  useEffect(() => {
+    loadSaved();
+  }, []);
 
   const handleCompare = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -20,27 +36,25 @@ export const CompetitorPage: React.FC = () => {
     setIsLoading(true);
     setError(null);
 
-    const urls = [url1, url2];
+    const urls = [url1.trim(), url2.trim()];
     if (url3.trim()) urls.push(url3.trim());
 
     try {
-      const res = await fetch('http://localhost:3001/api/competitor/compare', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ urls })
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Comparison failed');
-      }
-
+      const data = await compareCompetitorDomains(urls);
       setResult(data);
+      // Auto-save benchmark to local IndexedDB
+      await LocalWorkspaceDB.saveCompetitor(data);
+      await loadSaved();
     } catch (err: any) {
       setError(err.message || 'Failed to benchmark competitors');
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleDeleteSaved = async (id: string) => {
+    await LocalWorkspaceDB.deleteCompetitor(id);
+    await loadSaved();
   };
 
   const categories: Array<{ id: AuditCategory; label: string; icon: any }> = [
@@ -53,9 +67,9 @@ export const CompetitorPage: React.FC = () => {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="border-b border-slate-800 pb-6">
+      <div className="border-b border-slate-800/80 pb-6">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center">
             <Swords className="w-4 h-4" />
@@ -205,6 +219,39 @@ export const CompetitorPage: React.FC = () => {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Saved Benchmarks History */}
+      {savedBenchmarks.length > 0 && (
+        <div className="space-y-4 pt-4 border-t border-slate-800">
+          <h3 className="text-sm font-bold text-white tracking-tight flex items-center gap-2">
+            <Clock className="w-4 h-4 text-blue-400" />
+            <span>Saved Local Benchmarks ({savedBenchmarks.length})</span>
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {savedBenchmarks.map((bench) => (
+              <div key={bench.id} className="card-glow rounded-2xl p-5 border border-slate-800 space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="font-bold text-white text-xs">Winner: {bench.winnerDomain}</span>
+                  <button
+                    onClick={() => handleDeleteSaved(bench.id)}
+                    className="p-1 text-slate-500 hover:text-rose-400 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="flex items-center gap-2">
+                  {bench.sites?.map((s: any) => (
+                    <span key={s.domain} className="px-2 py-1 bg-slate-900 border border-slate-800 rounded-lg text-[11px] font-mono text-slate-300">
+                      {s.domain}: <strong className="text-emerald-400">{s.overallScore}</strong>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}

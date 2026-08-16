@@ -24,20 +24,14 @@ export function createRateLimiter(repo: ScanRepository) {
     const identifier = user ? user.id : `ip_${clientIp}`;
 
     const usageToday = repo.getUsageToday(identifier);
-    let maxLimit = 3; // Anonymous default
-
-    if (user) {
-      if (user.tier === 'agency') maxLimit = 500;
-      else if (user.tier === 'pro') maxLimit = 50;
-      else maxLimit = 10;
-    }
+    // In local-first workstation mode, provide generous limits (1000/day)
+    const maxLimit = 1000;
 
     if (usageToday >= maxLimit) {
       return res.status(429).json({
-        error: `Daily scan limit reached (${usageToday}/${maxLimit}). ${user ? 'Upgrade to Pro for higher limits.' : 'Create a free account to get 10 scans per day.'}`,
+        error: `Daily scan rate limit reached (${usageToday}/${maxLimit}). Please try again tomorrow.`,
         usageToday,
         maxLimit,
-        requiresAuth: !user,
       });
     }
 
