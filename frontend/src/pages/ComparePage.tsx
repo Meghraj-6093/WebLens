@@ -263,6 +263,21 @@ export const ComparePage: React.FC = () => {
           </div>
         </div>
       )}
+
+      {!comparison && !isLoading && (
+        <div className="card-glow rounded-3xl p-12 border border-slate-800 text-center space-y-4 max-w-md mx-auto">
+          <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-400 flex items-center justify-center mx-auto">
+            <GitCompare className="w-6 h-6" />
+          </div>
+          <h3 className="text-base font-bold text-white">Compare Multiple Audits</h3>
+          <p className="text-xs text-slate-400 leading-relaxed">
+            Run at least two audits on your websites to view historical delta graphs and detect newly introduced regressions.
+          </p>
+          <Button size="sm" variant="primary" onClick={() => navigate('/')}>
+            Run an Audit
+          </Button>
+        </div>
+      )}
     </div>
   );
 };

@@ -62,6 +62,28 @@ export async function runBrowserScan(
 
     const page = await context.newPage();
 
+    // SSRF route interceptor to block subresource requests to localhost/private IP
+    await context.route('**', async (route) => {
+      const reqUrl = route.request().url();
+      try {
+        const parsed = new URL(reqUrl);
+        const host = parsed.hostname.toLowerCase();
+        if (
+          host === 'localhost' ||
+          host === '127.0.0.1' ||
+          host === '169.254.169.254' ||
+          host.endsWith('.internal') ||
+          host.endsWith('.local')
+        ) {
+          await route.abort('blockedbyclient');
+          return;
+        }
+      } catch {
+        // invalid URL
+      }
+      await route.continue();
+    });
+
     // Listen to console
     page.on('console', (msg) => {
       consoleLogs.push({

@@ -66,3 +66,66 @@
   border: 1px solid rgba(16, 185, 129, 0.3);
   color: #34D399;
 }
+
+/* ========================================================= */
+/* CLIENT-READY PRINT & PDF EXPORT STYLESHEET                */
+/* ========================================================= */
+@media print {
+  @page {
+    margin: 1.2cm;
+    size: A4 portrait;
+  }
+
+  body {
+    background-color: #FFFFFF !important;
+    color: #0F172A !important;
+    font-size: 11pt !important;
+  }
+
+  /* Hide navigation, footers, interactive buttons, modal triggers, and animations */
+  header,
+  footer,
+  button,
+  nav,
+  input,
+  .animate-pulse,
+  .animate-spin,
+  .animate-fade-in {
+    display: none !important;
+  }
+
+  /* Convert dark cards to crisp executive white cards with subtle borders */
+  .card-glow {
+    background: #FFFFFF !important;
+    border: 1px solid #E2E8F0 !important;
+    box-shadow: none !important;
+    color: #0F172A !important;
+    page-break-inside: avoid;
+  }
+
+  h1, h2, h3, h4 {
+    color: #0F172A !important;
+  }
+
+  p, span, div {
+    color: #334155 !important;
+  }
+
+  /* Force color badges and score gauges to print clearly */
+  .text-emerald-400 { color: #059669 !important; }
+  .text-amber-400 { color: #D97706 !important; }
+  .text-rose-400 { color: #DC2626 !important; }
+  .text-blue-400 { color: #2563EB !important; }
+  .text-indigo-400 { color: #4F46E5 !important; }
+
+  /* Printable headers and page break management */
+  .break-before-page {
+    page-break-before: always;
+  }
+
+  pre, code {
+    background-color: #F8FAFC !important;
+    color: #1E293B !important;
+    border: 1px solid #CBD5E1 !important;
+  }
+}

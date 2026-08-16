@@ -3,9 +3,24 @@ import { ScanRepository } from '@weblens/database';
 
 export function createRateLimiter(repo: ScanRepository) {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Identifier: user ID if authenticated, else client IP
+    // Identifier: user ID if authenticated, else sanitized client IP
     const user = req.user;
-    const clientIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    let clientIp = '127.0.0.1';
+
+    const forwarded = req.headers['x-forwarded-for'];
+    if (typeof forwarded === 'string' && forwarded.trim()) {
+      clientIp = forwarded.split(',')[0].trim();
+    } else if (Array.isArray(forwarded) && forwarded.length > 0) {
+      clientIp = forwarded[0].trim();
+    } else if (req.socket.remoteAddress) {
+      clientIp = req.socket.remoteAddress;
+    }
+
+    // Clean IPv6 mapped IPv4 format if present (e.g. ::ffff:127.0.0.1)
+    if (clientIp.startsWith('::ffff:')) {
+      clientIp = clientIp.substring(7);
+    }
+
     const identifier = user ? user.id : `ip_${clientIp}`;
 
     const usageToday = repo.getUsageToday(identifier);
