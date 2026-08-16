@@ -15,17 +15,24 @@ import {
   validateUrlAgainstSSRF,
   ScanStageUpdate 
 } from '@weblens/scanner';
+import { ConcurrencyQueue } from './queueService.js';
 
 export class ScanService extends EventEmitter {
   private repo: ScanRepository;
   private orchestrator: ScanOrchestrator;
+  private queue: ConcurrencyQueue;
   private activeStreams: Map<string, Set<(data: any) => void>>;
 
-  constructor(repo?: ScanRepository) {
+  constructor(repo?: ScanRepository, maxConcurrency: number = 4) {
     super();
     this.repo = repo || new ScanRepository();
     this.orchestrator = new ScanOrchestrator();
+    this.queue = new ConcurrencyQueue(maxConcurrency);
     this.activeStreams = new Map();
+  }
+
+  get queueStats() {
+    return this.queue.stats;
   }
 
   async startScan(rawUrl: string, userId?: string | null): Promise<CreateScanResponse> {
@@ -49,8 +56,8 @@ export class ScanService extends EventEmitter {
       domain: norm.domain,
     });
 
-    // 4. Kick off async scan in background worker
-    this.runScanJob(scan).catch((err) => {
+    // 4. Enqueue scan into concurrency worker queue
+    this.queue.run(scan.id, () => this.runScanJob(scan), 50000).catch((err) => {
       console.error(`[ScanWorker Error] ${scan.id}:`, err);
     });
 
@@ -104,7 +111,12 @@ export class ScanService extends EventEmitter {
         this.repo.saveResources(report.resources);
       }
 
-      this.repo.updateScanCompleted(scanId, report.overall.score, report.screenshotUrl);
+      this.repo.updateScanCompleted(
+        scanId, 
+        report.overall.score, 
+        report.screenshotUrl, 
+        report.mobileScreenshotUrl
+      );
 
       this.broadcast(scanId, {
         scanId,
@@ -260,7 +272,8 @@ export class ScanService extends EventEmitter {
       },
       resources,
       resourceBreakdown,
-      screenshotUrl: scan.screenshotUrl
+      screenshotUrl: scan.screenshotUrl,
+      mobileScreenshotUrl: scan.mobileScreenshotUrl
     };
   }
 
@@ -295,8 +308,8 @@ export class ScanService extends EventEmitter {
     }
   }
 
-  createShareToken(scanId: string): { shareToken: string; shareUrl: string } {
-    const { shareToken } = this.repo.createShareReport(scanId);
+  createShareToken(scanId: string, options?: { visibility?: string; expiresDays?: number }): { shareToken: string; shareUrl: string } {
+    const { shareToken } = this.repo.createShareReport(scanId, options?.visibility as any, options?.expiresDays);
     return {
       shareToken,
       shareUrl: `/report/${scanId}?token=${shareToken}`

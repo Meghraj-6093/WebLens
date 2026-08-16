@@ -110,4 +110,43 @@ export class AuthService {
     if (!decoded || !decoded.sub) return null;
     return this.repo.getUserById(decoded.sub);
   }
+
+  async requestPasswordReset(email: string): Promise<{ resetToken: string; message: string }> {
+    const user = this.repo.getUserByEmail(email);
+    if (!user) {
+      // Return ambiguous message for user enumeration prevention
+      return { resetToken: '', message: 'If an account with this email exists, a password reset token has been generated.' };
+    }
+
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = crypto.createHash('sha256').update(resetToken).digest('hex');
+    const expiresAt = new Date(Date.now() + 3600000).toISOString(); // 1 hour
+
+    this.repo.createPasswordResetToken(user.id, tokenHash, expiresAt);
+    return {
+      resetToken,
+      message: 'Password reset token generated successfully. Valid for 1 hour.'
+    };
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
+    if (!token || !newPassword || newPassword.length < 6) {
+      throw new Error('Valid token and password of at least 6 characters are required.');
+    }
+
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const record = this.repo.verifyPasswordResetToken(tokenHash);
+    if (!record) {
+      throw new Error('Invalid or expired password reset token.');
+    }
+
+    const newPasswordHash = this.hashPassword(newPassword);
+    this.repo.updatePassword(record.userId, newPasswordHash);
+    this.repo.markPasswordResetTokenUsed(tokenHash);
+
+    return {
+      success: true,
+      message: 'Your password has been reset successfully. You can now sign in.'
+    };
+  }
 }

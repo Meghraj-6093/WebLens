@@ -43,11 +43,27 @@ function initSchema(db: DatabaseSync) {
     }
   }
 
-  // Safe migrations for newly added columns
+  // Safe migrations for newly added columns and tables
   try {
     db.exec('ALTER TABLE scans ADD COLUMN mobile_screenshot_url TEXT;');
   } catch {
     // Column already exists
+  }
+
+  try {
+    db.exec(`
+      CREATE TABLE IF NOT EXISTS password_reset_tokens (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        token_hash TEXT UNIQUE NOT NULL,
+        expires_at TEXT NOT NULL,
+        used INTEGER DEFAULT 0,
+        created_at TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+      );
+    `);
+  } catch {
+    // Table exists
   }
 }
 

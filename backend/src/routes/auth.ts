@@ -43,5 +43,33 @@ export function createAuthRouter(authService: AuthService): Router {
     return res.json({ user: req.user });
   });
 
+  // POST /api/auth/forgot-password
+  router.post('/forgot-password', async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: 'Email is required.' });
+      }
+      const result = await authService.requestPasswordReset(email);
+      return res.json(result);
+    } catch (err: any) {
+      return res.status(500).json({ error: err.message || 'Password reset request failed.' });
+    }
+  });
+
+  // POST /api/auth/reset-password
+  router.post('/reset-password', async (req: Request, res: Response) => {
+    try {
+      const { token, newPassword } = req.body;
+      if (!token || !newPassword) {
+        return res.status(400).json({ error: 'Token and new password are required.' });
+      }
+      const result = await authService.resetPassword(token, newPassword);
+      return res.json(result);
+    } catch (err: any) {
+      return res.status(400).json({ error: err.message || 'Password reset failed.' });
+    }
+  });
+
   return router;
 }

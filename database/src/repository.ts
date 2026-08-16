@@ -86,6 +86,43 @@ export class ScanRepository {
     };
   }
 
+  // --- Password Reset ---
+  createPasswordResetToken(userId: string, tokenHash: string, expiresAt: string): void {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at, used, created_at)
+      VALUES (?, ?, ?, ?, 0, ?)
+    `);
+    stmt.run(id, userId, tokenHash, expiresAt, now);
+  }
+
+  verifyPasswordResetToken(tokenHash: string): { userId: string } | null {
+    const stmt = this.db.prepare(`
+      SELECT user_id as userId, expires_at as expiresAt, used
+      FROM password_reset_tokens
+      WHERE token_hash = ?
+    `);
+    const row = stmt.get(tokenHash) as { userId: string; expiresAt: string; used: number } | undefined;
+    if (!row || row.used === 1) return null;
+
+    if (new Date().getTime() > new Date(row.expiresAt).getTime()) {
+      return null; // expired
+    }
+
+    return { userId: row.userId };
+  }
+
+  markPasswordResetTokenUsed(tokenHash: string): void {
+    const stmt = this.db.prepare(`UPDATE password_reset_tokens SET used = 1 WHERE token_hash = ?`);
+    stmt.run(tokenHash);
+  }
+
+  updatePassword(userId: string, newPasswordHash: string): void {
+    const stmt = this.db.prepare(`UPDATE users SET password_hash = ? WHERE id = ?`);
+    stmt.run(newPasswordHash, userId);
+  }
+
   // --- Projects System ---
   createProject(userId: string, name: string, domain: string, description?: string): ProjectRecord {
     const id = crypto.randomUUID();
