@@ -222,39 +222,41 @@ export const ReportPage: React.FC = () => {
         initialCategory={breakdownModalCategory}
       />
 
-      {/* 3. Tab Navigation Bar */}
-      <div className="border-b border-slate-800/80 flex items-center gap-2 overflow-x-auto pb-px">
-        {navTabs.map((tab) => {
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              onClick={() => {
-                setActiveTab(tab.id);
-                if (tab.id !== 'overview' && tab.id !== 'issues' && tab.id !== 'resources') {
-                  setSelectedCategory(tab.id as AuditCategory);
-                } else {
-                  setSelectedCategory('all');
-                }
-              }}
-              className={cn(
-                'flex items-center gap-2 px-4 py-3 text-xs font-semibold whitespace-nowrap border-b-2 transition-all duration-150',
-                isActive
-                  ? 'border-blue-500 text-blue-400 bg-blue-500/5'
-                  : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-slate-900/40'
-              )}
-            >
-              {tab.icon}
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
+      {/* 3. Sticky Tab Navigation Bar */}
+      <div className="sticky top-16 z-30 bg-[#070B14]/95 backdrop-blur-md -mx-4 px-4 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 py-2.5 border-y border-slate-800/80 shadow-lg">
+        <div className="max-w-7xl mx-auto flex items-center gap-2 overflow-x-auto pb-px">
+          {navTabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => {
+                  setActiveTab(tab.id);
+                  if (tab.id !== 'overview' && tab.id !== 'issues' && tab.id !== 'resources') {
+                    setSelectedCategory(tab.id as AuditCategory);
+                  } else {
+                    setSelectedCategory('all');
+                  }
+                }}
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 text-xs font-semibold whitespace-nowrap rounded-xl transition-all duration-150',
+                  isActive
+                    ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-sm'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
+                )}
+              >
+                {tab.icon}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 4. Tab Contents */}
       {/* Overview Tab */}
       {activeTab === 'overview' && (
-        <div className="space-y-8">
+        <div className="space-y-8 scroll-mt-32">
           {/* Core Web Vitals Grid */}
           {report.categories.performance?.metrics?.length > 0 && (
             <CoreWebVitalsGrid metrics={report.categories.performance.metrics} />
@@ -262,7 +264,7 @@ export const ReportPage: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-6">
-              <div>
+              <div className="scroll-mt-32">
                 <h3 className="text-base font-bold text-white tracking-tight mb-3 flex items-center gap-2">
                   <AlertCircle className="w-4 h-4 text-rose-400" />
                   <span>Prioritized Action Items</span>
