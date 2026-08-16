@@ -12,6 +12,12 @@ import { DashboardPage } from './pages/DashboardPage.js';
 import { ProjectsPage } from './pages/ProjectsPage.js';
 import { HistoryPage } from './pages/HistoryPage.js';
 import { ComparePage } from './pages/ComparePage.js';
+import { MonitoringPage } from './pages/MonitoringPage.js';
+import { CompetitorPage } from './pages/CompetitorPage.js';
+import { AgencyPage } from './pages/AgencyPage.js';
+import { ApiKeysPage } from './pages/ApiKeysPage.js';
+import { BillingPage } from './pages/BillingPage.js';
+import { AdminPage } from './pages/AdminPage.js';
 import { ProfilePage } from './pages/ProfilePage.js';
 
 export const App: React.FC = () => {
@@ -27,6 +33,12 @@ export const App: React.FC = () => {
               <Route path="/projects" element={<ProjectsPage />} />
               <Route path="/history" element={<HistoryPage />} />
               <Route path="/compare" element={<ComparePage />} />
+              <Route path="/monitoring" element={<MonitoringPage />} />
+              <Route path="/competitors" element={<CompetitorPage />} />
+              <Route path="/agency" element={<AgencyPage />} />
+              <Route path="/developers" element={<ApiKeysPage />} />
+              <Route path="/pricing" element={<BillingPage />} />
+              <Route path="/admin" element={<AdminPage />} />
               <Route path="/settings" element={<ProfilePage />} />
               <Route path="/scan/:id" element={<ScanProgressPage />} />
               <Route path="/report/:id" element={<ReportPage />} />

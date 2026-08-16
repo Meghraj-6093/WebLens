@@ -1,4 +1,4 @@
--- WebLens SQLite / PostgreSQL compatible schema
+-- WebLens SQLite / PostgreSQL compatible schema (Phase 1-4)
 
 CREATE TABLE IF NOT EXISTS users (
   id TEXT PRIMARY KEY,
@@ -153,3 +153,116 @@ CREATE TABLE IF NOT EXISTS usage_records (
 );
 
 CREATE INDEX IF NOT EXISTS idx_usage_identifier ON usage_records(identifier, date);
+
+-- ==========================================
+-- PHASE 4 EXTENSIONS
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS monitored_sites (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  project_id TEXT,
+  url TEXT NOT NULL,
+  domain TEXT NOT NULL,
+  frequency TEXT DEFAULT 'daily', -- 'daily' | 'weekly' | 'monthly'
+  last_scan_id TEXT,
+  last_score INTEGER,
+  last_scanned_at TEXT,
+  next_scan_at TEXT NOT NULL,
+  status TEXT DEFAULT 'active', -- 'active' | 'paused'
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_monitored_user ON monitored_sites(user_id);
+CREATE INDEX IF NOT EXISTS idx_monitored_next_scan ON monitored_sites(next_scan_at);
+
+CREATE TABLE IF NOT EXISTS alerts (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  site_id TEXT,
+  scan_id TEXT NOT NULL,
+  severity TEXT NOT NULL, -- 'critical' | 'high' | 'medium' | 'info'
+  title TEXT NOT NULL,
+  message TEXT NOT NULL,
+  channel TEXT NOT NULL,  -- 'webhook' | 'slack' | 'discord' | 'email'
+  sent_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_alerts_user ON alerts(user_id);
+
+CREATE TABLE IF NOT EXISTS webhook_destinations (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  type TEXT NOT NULL,     -- 'webhook' | 'slack' | 'discord' | 'email'
+  url TEXT NOT NULL,
+  is_active INTEGER DEFAULT 1,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_webhooks_user ON webhook_destinations(user_id);
+
+CREATE TABLE IF NOT EXISTS api_keys (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  key_hash TEXT UNIQUE NOT NULL,
+  key_prefix TEXT NOT NULL,
+  last_used_at TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_api_keys_hash ON api_keys(key_hash);
+CREATE INDEX IF NOT EXISTS idx_api_keys_user ON api_keys(user_id);
+
+CREATE TABLE IF NOT EXISTS teams (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  slug TEXT UNIQUE NOT NULL,
+  owner_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS team_members (
+  id TEXT PRIMARY KEY,
+  team_id TEXT NOT NULL,
+  user_id TEXT NOT NULL,
+  role TEXT DEFAULT 'member', -- 'owner' | 'admin' | 'member' | 'viewer'
+  joined_at TEXT NOT NULL,
+  UNIQUE(team_id, user_id),
+  FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS agency_settings (
+  id TEXT PRIMARY KEY,
+  user_id TEXT UNIQUE NOT NULL,
+  team_id TEXT,
+  brand_name TEXT NOT NULL,
+  logo_url TEXT,
+  primary_color TEXT DEFAULT '#3B82F6',
+  accent_color TEXT DEFAULT '#10B981',
+  footer_text TEXT,
+  company_website TEXT,
+  custom_domain TEXT,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS clients (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  team_id TEXT,
+  client_name TEXT NOT NULL,
+  contact_email TEXT,
+  domain TEXT NOT NULL,
+  notes TEXT,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);

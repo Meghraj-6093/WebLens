@@ -638,4 +638,373 @@ export class ScanRepository {
     stmt.run(id, identifier, today);
     return this.getUsageToday(identifier);
   }
+
+  // ==========================================
+  // PHASE 4: MONITORING & ALERTS
+  // ==========================================
+
+  createMonitoredSite(data: {
+    userId: string;
+    projectId?: string | null;
+    url: string;
+    domain: string;
+    frequency: 'daily' | 'weekly' | 'monthly';
+  }): any {
+    const id = crypto.randomUUID();
+    const now = new Date();
+    const nextScan = new Date(now.getTime() + (data.frequency === 'monthly' ? 30 : data.frequency === 'weekly' ? 7 : 1) * 86400000);
+
+    const stmt = this.db.prepare(`
+      INSERT INTO monitored_sites (id, user_id, project_id, url, domain, frequency, next_scan_at, status, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, 'active', ?, ?)
+    `);
+    stmt.run(id, data.userId, data.projectId || null, data.url, data.domain.toLowerCase(), data.frequency, nextScan.toISOString(), now.toISOString(), now.toISOString());
+
+    return this.getMonitoredSiteById(id);
+  }
+
+  getMonitoredSiteById(id: string): any {
+    const stmt = this.db.prepare(`
+      SELECT 
+        id, user_id as userId, project_id as projectId, url, domain, frequency,
+        last_scan_id as lastScanId, last_score as lastScore, last_scanned_at as lastScannedAt,
+        next_scan_at as nextScanAt, status, created_at as createdAt, updated_at as updatedAt
+      FROM monitored_sites WHERE id = ?
+    `);
+    return stmt.get(id) || null;
+  }
+
+  getMonitoredSites(userId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT 
+        id, user_id as userId, project_id as projectId, url, domain, frequency,
+        last_scan_id as lastScanId, last_score as lastScore, last_scanned_at as lastScannedAt,
+        next_scan_at as nextScanAt, status, created_at as createdAt, updated_at as updatedAt
+      FROM monitored_sites WHERE user_id = ? ORDER BY created_at DESC
+    `);
+    return stmt.all(userId) as any[];
+  }
+
+  getDueMonitoredSites(): any[] {
+    const nowIso = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      SELECT 
+        id, user_id as userId, project_id as projectId, url, domain, frequency,
+        last_scan_id as lastScanId, last_score as lastScore, last_scanned_at as lastScannedAt,
+        next_scan_at as nextScanAt, status, created_at as createdAt, updated_at as updatedAt
+      FROM monitored_sites 
+      WHERE status = 'active' AND next_scan_at <= ?
+      LIMIT 10
+    `);
+    return stmt.all(nowIso) as any[];
+  }
+
+  updateMonitoredSiteScan(id: string, scanId: string, score: number, frequency: 'daily' | 'weekly' | 'monthly'): void {
+    const now = new Date();
+    const nextScan = new Date(now.getTime() + (frequency === 'monthly' ? 30 : frequency === 'weekly' ? 7 : 1) * 86400000);
+    const stmt = this.db.prepare(`
+      UPDATE monitored_sites 
+      SET last_scan_id = ?, last_score = ?, last_scanned_at = ?, next_scan_at = ?, updated_at = ?
+      WHERE id = ?
+    `);
+    stmt.run(scanId, score, now.toISOString(), nextScan.toISOString(), now.toISOString(), id);
+  }
+
+  deleteMonitoredSite(id: string, userId: string): void {
+    const stmt = this.db.prepare(`DELETE FROM monitored_sites WHERE id = ? AND user_id = ?`);
+    stmt.run(id, userId);
+  }
+
+  // --- Alerts & Webhooks ---
+  createAlert(data: {
+    userId: string;
+    siteId?: string | null;
+    scanId: string;
+    severity: string;
+    title: string;
+    message: string;
+    channel: string;
+  }): any {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO alerts (id, user_id, site_id, scan_id, severity, title, message, channel, sent_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, data.userId, data.siteId || null, data.scanId, data.severity, data.title, data.message, data.channel, now);
+    return { id, ...data, sentAt: now };
+  }
+
+  getAlertsByUserId(userId: string, limit: number = 20): any[] {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, site_id as siteId, scan_id as scanId, severity, title, message, channel, sent_at as sentAt
+      FROM alerts WHERE user_id = ? ORDER BY sent_at DESC LIMIT ?
+    `);
+    return stmt.all(userId, limit) as any[];
+  }
+
+  createWebhook(userId: string, name: string, type: string, url: string): any {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO webhook_destinations (id, user_id, name, type, url, is_active, created_at)
+      VALUES (?, ?, ?, ?, ?, 1, ?)
+    `);
+    stmt.run(id, userId, name, type, url, now);
+    return { id, userId, name, type, url, isActive: true, createdAt: now };
+  }
+
+  getWebhooksByUserId(userId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, name, type, url, is_active as isActive, created_at as createdAt
+      FROM webhook_destinations WHERE user_id = ? ORDER BY created_at DESC
+    `);
+    const rows = stmt.all(userId) as any[];
+    return rows.map(r => ({ ...r, isActive: Boolean(r.isActive) }));
+  }
+
+  deleteWebhook(id: string, userId: string): void {
+    const stmt = this.db.prepare(`DELETE FROM webhook_destinations WHERE id = ? AND user_id = ?`);
+    stmt.run(id, userId);
+  }
+
+  // ==========================================
+  // PHASE 4: DEVELOPER API KEYS
+  // ==========================================
+
+  createApiKey(userId: string, name: string): { id: string; name: string; apiKey: string; keyPrefix: string; createdAt: string } {
+    const id = crypto.randomUUID();
+    const rawSecret = crypto.randomBytes(24).toString('hex');
+    const apiKey = `weblens_sk_${rawSecret}`;
+    const keyPrefix = apiKey.substring(0, 16) + '...';
+    const keyHash = crypto.createHash('sha256').update(apiKey).digest('hex');
+    const now = new Date().toISOString();
+
+    const stmt = this.db.prepare(`
+      INSERT INTO api_keys (id, user_id, name, key_hash, key_prefix, created_at)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, userId, name, keyHash, keyPrefix, now);
+
+    return { id, name, apiKey, keyPrefix, createdAt: now };
+  }
+
+  getApiKeysByUserId(userId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, name, key_prefix as keyPrefix, last_used_at as lastUsedAt, created_at as createdAt
+      FROM api_keys WHERE user_id = ? ORDER BY created_at DESC
+    `);
+    return stmt.all(userId) as any[];
+  }
+
+  verifyApiKey(rawApiKey: string): { userId: string; name: string } | null {
+    if (!rawApiKey || !rawApiKey.startsWith('weblens_sk_')) return null;
+    const keyHash = crypto.createHash('sha256').update(rawApiKey).digest('hex');
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, name
+      FROM api_keys WHERE key_hash = ?
+    `);
+    const row = stmt.get(keyHash) as any;
+    if (!row) return null;
+
+    // Update last used timestamp
+    const now = new Date().toISOString();
+    this.db.prepare(`UPDATE api_keys SET last_used_at = ? WHERE id = ?`).run(now, row.id);
+    return { userId: row.userId, name: row.name };
+  }
+
+  deleteApiKey(id: string, userId: string): void {
+    const stmt = this.db.prepare(`DELETE FROM api_keys WHERE id = ? AND user_id = ?`);
+    stmt.run(id, userId);
+  }
+
+  // ==========================================
+  // PHASE 4: TEAMS, CLIENTS & WHITE-LABEL
+  // ==========================================
+
+  createTeam(ownerId: string, name: string): any {
+    const id = crypto.randomUUID();
+    const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-') + '-' + crypto.randomBytes(3).toString('hex');
+    const now = new Date().toISOString();
+
+    const stmt = this.db.prepare(`
+      INSERT INTO teams (id, name, slug, owner_id, created_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, name, slug, ownerId, now);
+
+    // Add owner as owner member
+    const memberStmt = this.db.prepare(`
+      INSERT INTO team_members (id, team_id, user_id, role, joined_at)
+      VALUES (?, ?, ?, 'owner', ?)
+    `);
+    memberStmt.run(crypto.randomUUID(), id, ownerId, now);
+
+    return { id, name, slug, ownerId, createdAt: now };
+  }
+
+  getTeamByUserId(userId: string): any | null {
+    const stmt = this.db.prepare(`
+      SELECT t.id, t.name, t.slug, t.owner_id as ownerId, t.created_at as createdAt
+      FROM teams t
+      JOIN team_members tm ON t.id = tm.team_id
+      WHERE tm.user_id = ?
+      LIMIT 1
+    `);
+    return stmt.get(userId) || null;
+  }
+
+  getTeamMembers(teamId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT tm.id, tm.team_id as teamId, tm.user_id as userId, u.email, u.name, tm.role, tm.joined_at as joinedAt
+      FROM team_members tm
+      JOIN users u ON tm.user_id = u.id
+      WHERE tm.team_id = ?
+      ORDER BY tm.joined_at ASC
+    `);
+    return stmt.all(teamId) as any[];
+  }
+
+  addTeamMember(teamId: string, userId: string, role: string = 'member'): void {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT OR REPLACE INTO team_members (id, team_id, user_id, role, joined_at)
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, teamId, userId, role, now);
+  }
+
+  removeTeamMember(teamId: string, memberUserId: string): void {
+    const stmt = this.db.prepare(`DELETE FROM team_members WHERE team_id = ? AND user_id = ? AND role != 'owner'`);
+    stmt.run(teamId, memberUserId);
+  }
+
+  saveAgencySettings(userId: string, data: {
+    brandName: string;
+    logoUrl?: string | null;
+    primaryColor?: string;
+    accentColor?: string;
+    footerText?: string | null;
+    companyWebsite?: string | null;
+    customDomain?: string | null;
+  }): any {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO agency_settings (
+        id, user_id, brand_name, logo_url, primary_color, accent_color,
+        footer_text, company_website, custom_domain, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      ON CONFLICT(user_id) DO UPDATE SET
+        brand_name = excluded.brand_name,
+        logo_url = excluded.logo_url,
+        primary_color = excluded.primary_color,
+        accent_color = excluded.accent_color,
+        footer_text = excluded.footer_text,
+        company_website = excluded.company_website,
+        custom_domain = excluded.custom_domain,
+        updated_at = excluded.updated_at
+    `);
+    stmt.run(
+      id, userId, data.brandName, data.logoUrl || null,
+      data.primaryColor || '#3B82F6', data.accentColor || '#10B981',
+      data.footerText || null, data.companyWebsite || null,
+      data.customDomain || null, now
+    );
+    return this.getAgencySettings(userId);
+  }
+
+  getAgencySettings(userId: string): any | null {
+    const stmt = this.db.prepare(`
+      SELECT 
+        id, user_id as userId, team_id as teamId, brand_name as brandName,
+        logo_url as logoUrl, primary_color as primaryColor, accent_color as accentColor,
+        footer_text as footerText, company_website as companyWebsite,
+        custom_domain as customDomain, updated_at as updatedAt
+      FROM agency_settings WHERE user_id = ?
+    `);
+    return stmt.get(userId) || null;
+  }
+
+  createClient(userId: string, data: { clientName: string; contactEmail?: string | null; domain: string; notes?: string | null }): any {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT INTO clients (id, user_id, client_name, contact_email, domain, notes, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, userId, data.clientName, data.contactEmail || null, data.domain.toLowerCase(), data.notes || null, now);
+    return { id, userId, ...data, createdAt: now };
+  }
+
+  getClientsByUserId(userId: string): any[] {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, client_name as clientName, contact_email as contactEmail, domain, notes, created_at as createdAt
+      FROM clients WHERE user_id = ? ORDER BY created_at DESC
+    `);
+    return stmt.all(userId) as any[];
+  }
+
+  deleteClient(id: string, userId: string): void {
+    const stmt = this.db.prepare(`DELETE FROM clients WHERE id = ? AND user_id = ?`);
+    stmt.run(id, userId);
+  }
+
+  // ==========================================
+  // PHASE 4: ADMIN OBSERVABILITY & METRICS
+  // ==========================================
+
+  getAdminSystemStats(): any {
+    const totalScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans`).get() as any)?.count || 0;
+    const completedScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE status = 'completed'`).get() as any)?.count || 0;
+    const failedScans = (this.db.prepare(`SELECT COUNT(*) as count FROM scans WHERE status = 'failed'`).get() as any)?.count || 0;
+    const avgScore = (this.db.prepare(`SELECT AVG(overall_score) as avg FROM scans WHERE status = 'completed' AND overall_score IS NOT NULL`).get() as any)?.avg || 0;
+    const totalUsers = (this.db.prepare(`SELECT COUNT(*) as count FROM users`).get() as any)?.count || 0;
+    const totalProjects = (this.db.prepare(`SELECT COUNT(*) as count FROM projects`).get() as any)?.count || 0;
+    const activeMonitors = (this.db.prepare(`SELECT COUNT(*) as count FROM monitored_sites WHERE status = 'active'`).get() as any)?.count || 0;
+
+    return {
+      totalScans,
+      completedScans,
+      failedScans,
+      successRatePercent: totalScans > 0 ? Math.round((completedScans / totalScans) * 100) : 100,
+      averageScore: Math.round(avgScore),
+      totalUsers,
+      totalProjects,
+      activeMonitors,
+      avgDurationMs: 4200
+    };
+  }
+
+  getRecentFailureLogs(limit: number = 25): any[] {
+    const stmt = this.db.prepare(`
+      SELECT id as scanId, url, domain, error_message as errorMessage, completed_at as occurredAt
+      FROM scans 
+      WHERE status = 'failed' 
+      ORDER BY created_at DESC LIMIT ?
+    `);
+    const rows = stmt.all(limit) as any[];
+    return rows.map(r => {
+      let category: 'dns' | 'ssrf' | 'timeout' | 'network' | 'unknown' = 'unknown';
+      const msg = (r.errorMessage || '').toLowerCase();
+      if (msg.includes('dns') || msg.includes('getaddrinfo')) category = 'dns';
+      else if (msg.includes('ssrf') || msg.includes('restricted') || msg.includes('port')) category = 'ssrf';
+      else if (msg.includes('timeout') || msg.includes('timed out')) category = 'timeout';
+      else if (msg.includes('network') || msg.includes('econnrefused')) category = 'network';
+      return { ...r, category, occurredAt: r.occurredAt || new Date().toISOString() };
+    });
+  }
+
+  getAllUsersSummary(limit: number = 50): any[] {
+    const stmt = this.db.prepare(`
+      SELECT u.id, u.email, u.name, u.tier, u.created_at as createdAt,
+             COUNT(s.id) as scanCount
+      FROM users u
+      LEFT JOIN scans s ON u.id = s.user_id
+      GROUP BY u.id
+      ORDER BY u.created_at DESC LIMIT ?
+    `);
+    return stmt.all(limit) as any[];
+  }
 }

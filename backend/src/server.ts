@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import { ScanRepository } from '@weblens/database';
 import { ScanService } from './services/scanService.js';
 import { AuthService } from './services/authService.js';
+import { MonitorService } from './services/monitorService.js';
 import { createAuthMiddleware } from './middleware/auth.js';
 import { createScanRouter } from './routes/scans.js';
 import { createReportRouter } from './routes/reports.js';
@@ -12,6 +13,13 @@ import { createAuthRouter } from './routes/auth.js';
 import { createProjectRouter } from './routes/projects.js';
 import { createHistoryRouter } from './routes/history.js';
 import { createAiRouter } from './routes/ai.js';
+import { createMonitoringRouter } from './routes/monitoring.js';
+import { createCompetitorRouter } from './routes/competitor.js';
+import { createTeamRouter } from './routes/teams.js';
+import { createWhiteLabelRouter } from './routes/whiteLabel.js';
+import { createPublicApiRouter } from './routes/v1/api.js';
+import { createAdminRouter } from './routes/admin.js';
+import { createBillingRouter } from './routes/billing.js';
 import { Logger } from './utils/logger.js';
 
 dotenv.config();
@@ -33,19 +41,25 @@ app.use((_req, res, next) => {
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'X-API-Key']
 }));
-app.use(express.json({ limit: '2mb' }));
+app.use(express.json({ limit: '5mb' }));
 
 // 3. Initialize Repositories and Services
 const repository = new ScanRepository();
 const scanService = new ScanService(repository);
 const authService = new AuthService(repository);
+const monitorService = new MonitorService(repository, scanService);
 
-// 4. Auth Middleware (populates req.user)
+// 4. Start Monitoring Scheduler in background
+if (process.env.NODE_ENV !== 'test') {
+  monitorService.startScheduler(60000);
+}
+
+// 5. Auth Middleware (populates req.user from JWT if provided)
 app.use(createAuthMiddleware(authService));
 
-// 5. Deep Health & Observability Endpoint
+// 6. Deep Health & Observability Endpoint
 app.get('/api/health', (_req, res) => {
   const memory = process.memoryUsage();
   res.json({
@@ -66,7 +80,7 @@ app.get('/api/health', (_req, res) => {
   });
 });
 
-// 6. Mount REST Routes
+// 7. Mount REST Routes (Phases 1-4)
 app.use('/api/auth', createAuthRouter(authService));
 app.use('/api/projects', createProjectRouter(repository));
 app.use('/api/history', createHistoryRouter(repository, scanService));
@@ -74,18 +88,25 @@ app.use('/api/ai', createAiRouter());
 app.use('/api/scans', createScanRouter(scanService, repository));
 app.use('/api/reports', createReportRouter(scanService, repository));
 app.use('/api/demo', createDemoRouter());
+app.use('/api/monitoring', createMonitoringRouter(repository));
+app.use('/api/competitor', createCompetitorRouter(scanService));
+app.use('/api/teams', createTeamRouter(repository));
+app.use('/api/white-label', createWhiteLabelRouter(repository));
+app.use('/api/v1', createPublicApiRouter(scanService, repository));
+app.use('/api/admin', createAdminRouter(repository, scanService));
+app.use('/api/billing', createBillingRouter(repository));
 
-// 7. Global Error Handler
+// 8. Global Error Handler
 app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   Logger.error('Unhandled Server Error', { path: _req.path, method: _req.method }, err);
   res.status(500).json({ error: err.message || 'Internal Server Error' });
 });
 
-// 8. Start Server
+// 9. Start Server
 if (process.env.NODE_ENV !== 'test') {
   app.listen(PORT, () => {
-    Logger.info(`🚀 WebLens API Server is running on port ${PORT}`);
+    Logger.info(`🚀 WebLens Commercial API Server is running on port ${PORT}`);
   });
 }
 
-export { app, scanService, repository, authService };
+export { app, scanService, repository, authService, monitorService };

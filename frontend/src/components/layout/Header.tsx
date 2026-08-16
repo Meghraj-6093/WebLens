@@ -10,7 +10,12 @@ import {
   Sparkles, 
   LogIn, 
   LogOut, 
-  Settings 
+  Settings,
+  Swords,
+  Building2,
+  Key,
+  Shield,
+  CreditCard
 } from 'lucide-react';
 import { cn } from '../../lib/utils.js';
 
@@ -22,9 +27,12 @@ export const Header: React.FC = () => {
   const navLinks = [
     { to: '/', label: 'Scanner' },
     { to: '/dashboard', label: 'Dashboard' },
-    { to: '/projects', label: 'Projects' },
-    { to: '/history', label: 'History' },
-    { to: '/compare', label: 'Compare' },
+    { to: '/monitoring', label: 'Monitoring' },
+    { to: '/competitors', label: 'Competitors' },
+    { to: '/agency', label: 'Agency' },
+    { to: '/developers', label: 'API' },
+    { to: '/pricing', label: 'Pricing' },
+    { to: '/admin', label: 'Admin' },
   ];
 
   return (
@@ -45,7 +53,7 @@ export const Header: React.FC = () => {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden lg:flex items-center gap-1">
             {navLinks.map((link) => {
               const isActive = location.pathname === link.to;
               return (
@@ -53,7 +61,7 @@ export const Header: React.FC = () => {
                   key={link.to}
                   to={link.to}
                   className={cn(
-                    'px-3 py-1.5 rounded-lg text-xs font-semibold transition-all',
+                    'px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-all',
                     isActive
                       ? 'bg-blue-600/10 text-blue-400 border border-blue-500/20'
                       : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60'
