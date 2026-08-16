@@ -10,3 +10,5 @@ export * from './scanners/mobile.js';
 export * from './scanners/bestPractices.js';
 export * from './scoring/calculator.js';
 export * from './orchestrator.js';
+export * from './ai/explainer.js';
+export * from './ai/fixGenerator.js';

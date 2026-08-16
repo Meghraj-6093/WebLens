@@ -42,6 +42,13 @@ function initSchema(db: DatabaseSync) {
       db.exec(schemaSql);
     }
   }
+
+  // Safe migrations for newly added columns
+  try {
+    db.exec('ALTER TABLE scans ADD COLUMN mobile_screenshot_url TEXT;');
+  } catch {
+    // Column already exists
+  }
 }
 
 export function closeDatabase(): void {

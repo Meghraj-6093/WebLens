@@ -1,18 +1,22 @@
 import { Router, Request, Response } from 'express';
 import { ScanService } from '../services/scanService.js';
+import { ScanRepository } from '@weblens/database';
+import { createRateLimiter } from '../middleware/rateLimit.js';
 
-export function createScanRouter(scanService: ScanService): Router {
+export function createScanRouter(scanService: ScanService, repo: ScanRepository): Router {
   const router = Router();
+  const rateLimiter = createRateLimiter(repo);
 
-  // POST /api/scans
-  router.post('/', async (req: Request, res: Response) => {
+  // POST /api/scans with rate limiter and user association
+  router.post('/', rateLimiter, async (req: Request, res: Response) => {
     try {
       const { url } = req.body;
       if (!url || typeof url !== 'string') {
         return res.status(400).json({ error: 'URL is required.' });
       }
 
-      const result = await scanService.startScan(url);
+      const userId = req.user ? req.user.id : null;
+      const result = await scanService.startScan(url, userId);
       return res.status(201).json(result);
     } catch (err: any) {
       return res.status(400).json({ error: err.message || 'Failed to start scan.' });

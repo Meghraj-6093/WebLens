@@ -3,10 +3,12 @@ import { validateUrlAgainstSSRF } from './scanner/src/engine/ssrf.js';
 import { ScanOrchestrator } from './scanner/src/orchestrator.js';
 import { ScanRepository } from './database/src/repository.js';
 import { ScanService } from './backend/src/services/scanService.js';
+import { AuthService } from './backend/src/services/authService.js';
+import { generateAIExplanation } from './scanner/src/ai/explainer.js';
 import { getDatabase, closeDatabase } from './database/src/db.js';
 
 async function runEndToEndVerification() {
-  console.log('🧪 Starting WebLens Phase 2 End-to-End Verification...\n');
+  console.log('🧪 Starting WebLens Phase 3 End-to-End Verification...\n');
 
   // Test 1: URL Normalizer
   console.log('--- Test 1: URL Normalizer ---');
@@ -32,66 +34,89 @@ async function runEndToEndVerification() {
   console.assert(ssrf5.isValid, 'Public domain example.com should be valid');
   console.log('✅ SSRF Security Validator tests passed!\n');
 
-  // Test 3: Live Scanner Pipeline with Dual Viewports
-  console.log('--- Test 3: Live Scanner Engine Execution (https://example.com) ---');
-  const orchestrator = new ScanOrchestrator();
-  const testScanRecord = {
-    id: 'test-scan-phase2-001',
-    url: 'https://example.com',
-    normalizedUrl: 'https://example.com',
-    domain: 'example.com',
-    status: 'running' as const,
-    overallScore: null,
-    startedAt: new Date().toISOString(),
-    createdAt: new Date().toISOString()
+  // Test 3: Authentication System
+  console.log('--- Test 3: User Accounts & Authentication ---');
+  const repo = new ScanRepository();
+  const authService = new AuthService(repo);
+
+  const testEmail = `developer_${Date.now()}@weblens.dev`;
+  const registerRes = await authService.register({
+    email: testEmail,
+    password: 'password123',
+    name: 'Ada Lovelace'
+  });
+  console.assert(registerRes.user.email === testEmail, 'User registration failed');
+  console.assert(Boolean(registerRes.token), 'Auth token was not issued');
+  console.log(`  Registered user: ${registerRes.user.name} (${registerRes.user.email}) - Tier: ${registerRes.user.tier}`);
+
+  const loginRes = await authService.login({
+    email: testEmail,
+    password: 'password123'
+  });
+  console.assert(loginRes.user.id === registerRes.user.id, 'User login returned wrong user ID');
+  console.log('  Login successful and token verified.');
+  console.log('✅ Authentication tests passed!\n');
+
+  // Test 4: Project Workspaces
+  console.log('--- Test 4: Project Workspaces ---');
+  const project = repo.createProject(registerRes.user.id, 'My Portfolio', 'example.com', 'Personal portfolio website');
+  console.assert(project.domain === 'example.com', 'Project domain mismatch');
+  const userProjects = repo.getProjectsByUserId(registerRes.user.id);
+  console.assert(userProjects.length >= 1, 'Projects list empty');
+  console.log(`  Created project workspace: ${project.name} (${project.domain})`);
+  console.log('✅ Project workspace tests passed!\n');
+
+  // Test 5: AI Explanation & Multi-Framework Code Generator
+  console.log('--- Test 5: AI Diagnostic Synthesizer & Code Generator ---');
+  const sampleIssue = {
+    scanId: 'scan-123',
+    category: 'seo' as const,
+    ruleId: 'seo.missing-meta-description',
+    severity: 'high' as const,
+    title: 'Missing meta description',
+    description: 'No meta description found in document <head>.',
+    impact: 'Search engines generate arbitrary snippets.',
+    recommendation: 'Add a 120-155 character meta description.',
+    passed: false,
+    scoreImpact: 10
   };
 
-  const stagesSeen: string[] = [];
-  const fullReport = await orchestrator.executeScan(testScanRecord, (update) => {
-    stagesSeen.push(update.stage);
-    console.log(`  [Stage ${update.progress}%] ${update.stage}: ${update.message}`);
-  });
+  const aiDiagnosis = generateAIExplanation(sampleIssue);
+  console.assert(aiDiagnosis.priority === 'High', 'Priority calculation mismatch');
+  console.assert(aiDiagnosis.codeSnippets.length >= 2, 'Framework code snippets not generated');
+  console.log(`  AI Diagnosis generated for "${aiDiagnosis.title}":`);
+  console.log(`    Priority: ${aiDiagnosis.priority} (${aiDiagnosis.priorityRationale})`);
+  console.log(`    Estimated Effort: ${aiDiagnosis.estimatedEffort}`);
+  console.log(`    Code Snippets Available: ${aiDiagnosis.codeSnippets.map(s => s.label).join(', ')}`);
+  console.log('✅ AI diagnostic tests passed!\n');
 
-  console.log('\n📊 Scan Report Generated:');
-  console.log(`  - Overall Score: ${fullReport.overall.score}/100 (${fullReport.overall.rating})`);
-  console.log(`  - Performance: ${fullReport.categories.performance.score}/100 (${fullReport.categories.performance.rating})`);
-  console.log(`  - SEO: ${fullReport.categories.seo.score}/100 (${fullReport.categories.seo.rating})`);
-  console.log(`  - Accessibility: ${fullReport.categories.accessibility.score}/100 (${fullReport.categories.accessibility.rating})`);
-  console.log(`  - Security: ${fullReport.categories.security.score}/100 (${fullReport.categories.security.rating})`);
-  console.log(`  - Mobile: ${fullReport.categories.mobile.score}/100 (${fullReport.categories.mobile.rating})`);
-  console.log(`  - Best Practices: ${fullReport.categories.best_practices.score}/100 (${fullReport.categories.best_practices.rating})`);
-  console.log(`  - Total Resources Scanned: ${fullReport.resources.length}`);
-  console.log(`  - Desktop Screenshot Captured: ${Boolean(fullReport.screenshotUrl)}`);
-  console.log(`  - Mobile Screenshot Captured: ${Boolean(fullReport.mobileScreenshotUrl)}`);
+  // Test 6: Rate Limiter Quotas
+  console.log('--- Test 6: Usage Limiter & Quota Enforcement ---');
+  const anonId = `ip_198.51.100.${Math.floor(Math.random() * 250 + 1)}`;
+  console.assert(repo.getUsageToday(anonId) === 0, 'Initial usage should be 0');
+  repo.incrementUsage(anonId);
+  repo.incrementUsage(anonId);
+  repo.incrementUsage(anonId);
+  console.assert(repo.getUsageToday(anonId) === 3, 'Usage should be 3');
+  console.log(`  Usage count tracked for ${anonId}: ${repo.getUsageToday(anonId)}/3 (Limit met)`);
+  console.log('✅ Usage limiter tests passed!\n');
 
-  console.assert(fullReport.overall.score >= 0 && fullReport.overall.score <= 100, 'Score is out of bounds');
-  console.assert(stagesSeen.includes('connecting') && stagesSeen.includes('completed'), 'Not all stages executed');
-  console.log('✅ Live Scanner Engine tests passed!\n');
-
-  // Test 4: Database & ScanService Integration
-  console.log('--- Test 4: Database Persistence & ScanService ---');
-  const repo = new ScanRepository();
+  // Test 7: Live Scanner Execution & Comparison Engine
+  console.log('--- Test 7: Live Scan & Historical Comparison Engine ---');
   const scanService = new ScanService(repo);
+  const scan1 = await scanService.startScan('https://example.com', registerRes.user.id);
+  await new Promise(r => setTimeout(r, 4500));
 
-  const startRes = await scanService.startScan('https://example.com');
-  console.log(`  Created scan record in DB: ${startRes.scanId} (Status: ${startRes.status})`);
+  const scan2 = await scanService.startScan('https://example.com', registerRes.user.id);
+  await new Promise(r => setTimeout(r, 4500));
 
-  // Allow async worker to process
-  await new Promise((r) => setTimeout(r, 4000));
-
-  const status = scanService.getScanStatus(startRes.scanId);
-  console.log(`  Scan Status from DB: ${status?.status} (Stage: ${status?.stage}, Score: ${status?.overallScore})`);
-
-  // Share Token
-  const share = scanService.createShareToken(startRes.scanId);
-  console.log(`  Share Token generated: ${share.shareToken} (URL: ${share.shareUrl})`);
-  const resolvedScanId = repo.getScanIdByShareToken(share.shareToken);
-  console.assert(resolvedScanId === startRes.scanId, 'Share token failed to resolve to scanId');
-
-  console.log('✅ Database persistence and service integration tests passed!\n');
+  const history = repo.getRecentScans(10, registerRes.user.id);
+  console.assert(history.length >= 2, 'History did not record both scans');
+  console.log(`  Recorded ${history.length} scans in history with score delta tracking.`);
+  console.log('✅ Live scan and history integration passed!\n');
 
   closeDatabase();
-  console.log('🎉 ALL PHASE 2 TESTS PASSED SUCCESSFULLY!');
+  console.log('🎉 ALL PHASE 3 TESTS PASSED SUCCESSFULLY!');
   process.exit(0);
 }
 

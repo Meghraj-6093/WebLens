@@ -1,5 +1,31 @@
 -- WebLens SQLite / PostgreSQL compatible schema
 
+CREATE TABLE IF NOT EXISTS users (
+  id TEXT PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password_hash TEXT NOT NULL,
+  name TEXT NOT NULL,
+  tier TEXT DEFAULT 'free', -- 'free' | 'pro' | 'agency'
+  avatar_url TEXT,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
+
+CREATE TABLE IF NOT EXISTS projects (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  domain TEXT NOT NULL,
+  description TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_projects_user_id ON projects(user_id);
+CREATE INDEX IF NOT EXISTS idx_projects_domain ON projects(domain);
+
 CREATE TABLE IF NOT EXISTS scans (
   id TEXT PRIMARY KEY,
   user_id TEXT,
@@ -11,20 +37,35 @@ CREATE TABLE IF NOT EXISTS scans (
   stage TEXT,
   progress INTEGER DEFAULT 0,
   screenshot_url TEXT,
+  mobile_screenshot_url TEXT,
   error_message TEXT,
   started_at TEXT NOT NULL,
   completed_at TEXT,
-  created_at TEXT NOT NULL
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_scans_domain ON scans(domain);
 CREATE INDEX IF NOT EXISTS idx_scans_status ON scans(status);
+CREATE INDEX IF NOT EXISTS idx_scans_user_id ON scans(user_id);
 CREATE INDEX IF NOT EXISTS idx_scans_created_at ON scans(created_at);
+
+CREATE TABLE IF NOT EXISTS project_scans (
+  id TEXT PRIMARY KEY,
+  project_id TEXT NOT NULL,
+  scan_id TEXT NOT NULL,
+  created_at TEXT NOT NULL,
+  FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE,
+  FOREIGN KEY (scan_id) REFERENCES scans(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_project_scans_project ON project_scans(project_id);
+CREATE INDEX IF NOT EXISTS idx_project_scans_scan ON project_scans(scan_id);
 
 CREATE TABLE IF NOT EXISTS category_scores (
   id TEXT PRIMARY KEY,
   scan_id TEXT NOT NULL,
-  category TEXT NOT NULL, -- 'performance', 'seo', 'accessibility', 'security', 'mobile', 'best_practices'
+  category TEXT NOT NULL,
   score INTEGER NOT NULL,
   rating TEXT NOT NULL,
   critical_count INTEGER DEFAULT 0,
@@ -44,14 +85,14 @@ CREATE TABLE IF NOT EXISTS audit_results (
   scan_id TEXT NOT NULL,
   category TEXT NOT NULL,
   rule_id TEXT NOT NULL,
-  severity TEXT NOT NULL, -- 'critical', 'high', 'medium', 'low', 'passed'
+  severity TEXT NOT NULL,
   title TEXT NOT NULL,
   description TEXT NOT NULL,
   impact TEXT NOT NULL,
   recommendation TEXT NOT NULL,
   technical_details TEXT,
   location TEXT,
-  passed INTEGER NOT NULL, -- 1 for true, 0 for false
+  passed INTEGER NOT NULL,
   score_impact INTEGER DEFAULT 0,
   fix_status TEXT DEFAULT 'not_fixed',
   created_at TEXT NOT NULL,
@@ -90,3 +131,13 @@ CREATE TABLE IF NOT EXISTS reports (
 );
 
 CREATE INDEX IF NOT EXISTS idx_reports_token ON reports(share_token);
+
+CREATE TABLE IF NOT EXISTS usage_records (
+  id TEXT PRIMARY KEY,
+  identifier TEXT NOT NULL, -- user_id or IP address
+  date TEXT NOT NULL,       -- YYYY-MM-DD
+  count INTEGER DEFAULT 1,
+  UNIQUE(identifier, date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_identifier ON usage_records(identifier, date);

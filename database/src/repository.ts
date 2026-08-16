@@ -7,7 +7,12 @@ import {
   AuditResult, 
   CategoryScore, 
   ResourceRecord, 
-  AuditCategory 
+  AuditCategory,
+  User,
+  UserTier,
+  ProjectRecord,
+  ProjectSummary,
+  HistoricalScanItem
 } from '@weblens/shared';
 import crypto from 'crypto';
 
@@ -18,7 +23,150 @@ export class ScanRepository {
     this.db = db || getDatabase();
   }
 
-  // --- Scans ---
+  // --- Users & Authentication ---
+  createUser(userData: {
+    email: string;
+    passwordHash: string;
+    name: string;
+    tier?: UserTier;
+    avatarUrl?: string | null;
+  }): User {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const tier = userData.tier || 'free';
+
+    const stmt = this.db.prepare(`
+      INSERT INTO users (id, email, password_hash, name, tier, avatar_url, created_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+
+    stmt.run(id, userData.email.toLowerCase(), userData.passwordHash, userData.name, tier, userData.avatarUrl || null, now);
+    return this.getUserById(id)!;
+  }
+
+  getUserById(id: string): User | null {
+    const stmt = this.db.prepare(`
+      SELECT id, email, name, tier, avatar_url as avatarUrl, created_at as createdAt
+      FROM users WHERE id = ?
+    `);
+    const row = stmt.get(id) as any;
+    if (!row) return null;
+
+    const scansToday = this.getUsageToday(row.id);
+    const maxScans = row.tier === 'agency' ? 500 : row.tier === 'pro' ? 50 : 10;
+
+    return {
+      ...row,
+      scansToday,
+      maxScansPerDay: maxScans
+    };
+  }
+
+  getUserByEmail(email: string): (User & { passwordHash: string }) | null {
+    const stmt = this.db.prepare(`
+      SELECT id, email, password_hash as passwordHash, name, tier, avatar_url as avatarUrl, created_at as createdAt
+      FROM users WHERE email = ?
+    `);
+    const row = stmt.get(email.toLowerCase()) as any;
+    if (!row) return null;
+
+    const scansToday = this.getUsageToday(row.id);
+    const maxScans = row.tier === 'agency' ? 500 : row.tier === 'pro' ? 50 : 10;
+
+    return {
+      id: row.id,
+      email: row.email,
+      passwordHash: row.passwordHash,
+      name: row.name,
+      tier: row.tier,
+      avatarUrl: row.avatarUrl,
+      createdAt: row.createdAt,
+      scansToday,
+      maxScansPerDay: maxScans
+    };
+  }
+
+  // --- Projects System ---
+  createProject(userId: string, name: string, domain: string, description?: string): ProjectRecord {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+
+    const stmt = this.db.prepare(`
+      INSERT INTO projects (id, user_id, name, domain, description, created_at, updated_at)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    stmt.run(id, userId, name, domain.toLowerCase(), description || null, now, now);
+
+    return {
+      id,
+      userId,
+      name,
+      domain: domain.toLowerCase(),
+      description: description || null,
+      createdAt: now,
+      updatedAt: now
+    };
+  }
+
+  getProjectsByUserId(userId: string): ProjectSummary[] {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, name, domain, description, created_at as createdAt, updated_at as updatedAt
+      FROM projects WHERE user_id = ? ORDER BY created_at DESC
+    `);
+    const projects = stmt.all(userId) as ProjectRecord[];
+
+    return projects.map((p) => {
+      // Find latest scan for this domain or linked project
+      const scansStmt = this.db.prepare(`
+        SELECT id, domain, status, overall_score as overallScore, started_at as startedAt, completed_at as completedAt, created_at as createdAt
+        FROM scans 
+        WHERE (domain = ? OR id IN (SELECT scan_id FROM project_scans WHERE project_id = ?))
+          AND status = 'completed'
+        ORDER BY created_at DESC LIMIT 2
+      `);
+      const recentScans = scansStmt.all(p.domain, p.id) as any[];
+
+      const totalScansStmt = this.db.prepare(`
+        SELECT COUNT(*) as count FROM scans 
+        WHERE domain = ? OR id IN (SELECT scan_id FROM project_scans WHERE project_id = ?)
+      `);
+      const totalScans = (totalScansStmt.get(p.domain, p.id) as any)?.count || 0;
+
+      const latestScan = recentScans[0] || null;
+      let scoreChange: number | null = null;
+      if (recentScans.length >= 2 && recentScans[0].overallScore !== null && recentScans[1].overallScore !== null) {
+        scoreChange = recentScans[0].overallScore - recentScans[1].overallScore;
+      }
+
+      return {
+        ...p,
+        totalScans,
+        latestScore: latestScan?.overallScore ?? null,
+        scoreChange,
+        latestScan
+      };
+    });
+  }
+
+  getProjectById(id: string): ProjectRecord | null {
+    const stmt = this.db.prepare(`
+      SELECT id, user_id as userId, name, domain, description, created_at as createdAt, updated_at as updatedAt
+      FROM projects WHERE id = ?
+    `);
+    return (stmt.get(id) as any) || null;
+  }
+
+  linkScanToProject(projectId: string, scanId: string): void {
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const stmt = this.db.prepare(`
+      INSERT OR IGNORE INTO project_scans (id, project_id, scan_id, created_at)
+      VALUES (?, ?, ?, ?)
+    `);
+    stmt.run(id, projectId, scanId, now);
+  }
+
+  // --- Scans CRUD ---
   createScan(scan: {
     id?: string;
     userId?: string | null;
@@ -59,14 +207,14 @@ export class ScanRepository {
     stmt.run(stage, progress, id);
   }
 
-  updateScanCompleted(id: string, overallScore: number, screenshotUrl?: string | null): void {
+  updateScanCompleted(id: string, overallScore: number, screenshotUrl?: string | null, mobileScreenshotUrl?: string | null): void {
     const now = new Date().toISOString();
     const stmt = this.db.prepare(`
       UPDATE scans 
-      SET status = 'completed', stage = 'completed', progress = 100, overall_score = ?, screenshot_url = ?, completed_at = ?
+      SET status = 'completed', stage = 'completed', progress = 100, overall_score = ?, screenshot_url = ?, mobile_screenshot_url = ?, completed_at = ?
       WHERE id = ?
     `);
-    stmt.run(overallScore, screenshotUrl || null, now, id);
+    stmt.run(overallScore, screenshotUrl || null, mobileScreenshotUrl || null, now, id);
   }
 
   updateScanFailed(id: string, errorMessage: string, status: ScanStatus = 'failed'): void {
@@ -92,6 +240,7 @@ export class ScanRepository {
         stage, 
         progress, 
         screenshot_url as screenshotUrl, 
+        mobile_screenshot_url as mobileScreenshotUrl,
         error_message as errorMessage, 
         started_at as startedAt, 
         completed_at as completedAt, 
@@ -103,7 +252,50 @@ export class ScanRepository {
     return row || null;
   }
 
-  getRecentScans(limit: number = 10): ScanRecord[] {
+  getRecentScans(limit: number = 15, userId?: string | null): HistoricalScanItem[] {
+    let sql = `
+      SELECT 
+        id, 
+        user_id as userId, 
+        url, 
+        normalized_url as normalizedUrl, 
+        domain, 
+        status, 
+        overall_score as overallScore, 
+        stage, 
+        progress, 
+        screenshot_url as screenshotUrl, 
+        mobile_screenshot_url as mobileScreenshotUrl,
+        error_message as errorMessage, 
+        started_at as startedAt, 
+        completed_at as completedAt, 
+        created_at as createdAt
+      FROM scans 
+    `;
+    const params: any[] = [];
+    if (userId) {
+      sql += ` WHERE user_id = ? `;
+      params.push(userId);
+    }
+    sql += ` ORDER BY created_at DESC LIMIT ? `;
+    params.push(limit);
+
+    const stmt = this.db.prepare(sql);
+    const rows = stmt.all(...params) as HistoricalScanItem[];
+
+    // Calculate delta changes against preceding scan for same domain
+    return rows.map((r, i) => {
+      let scoreChange: number | null = null;
+      // Look for previous scan of same domain
+      const prev = rows.slice(i + 1).find((other) => other.domain === r.domain && other.overallScore !== null);
+      if (prev && r.overallScore !== null && prev.overallScore !== null) {
+        scoreChange = r.overallScore - prev.overallScore;
+      }
+      return { ...r, scoreChange };
+    });
+  }
+
+  getScansByDomain(domain: string, limit: number = 10): ScanRecord[] {
     const stmt = this.db.prepare(`
       SELECT 
         id, 
@@ -116,15 +308,16 @@ export class ScanRepository {
         stage, 
         progress, 
         screenshot_url as screenshotUrl, 
+        mobile_screenshot_url as mobileScreenshotUrl,
         error_message as errorMessage, 
         started_at as startedAt, 
         completed_at as completedAt, 
         created_at as createdAt
       FROM scans 
-      ORDER BY created_at DESC 
-      LIMIT ?
+      WHERE domain = ? AND status = 'completed'
+      ORDER BY created_at DESC LIMIT ?
     `);
-    return stmt.all(limit) as any;
+    return stmt.all(domain.toLowerCase(), limit) as any;
   }
 
   // --- Category Scores ---
@@ -356,7 +549,7 @@ export class ScanRepository {
   }
 
   // --- Reports (Sharing) ---
-  createShareReport(scanId: string, visibility: 'public' | 'private' = 'public'): { shareToken: string; id: string } {
+  createShareReport(scanId: string, visibility: 'public' | 'private' = 'public', expiresDays?: number): { shareToken: string; id: string } {
     const existing = this.db.prepare(`SELECT id, share_token as shareToken FROM reports WHERE scan_id = ?`).get(scanId) as { id: string; shareToken: string } | undefined;
     if (existing) {
       return existing;
@@ -364,20 +557,48 @@ export class ScanRepository {
 
     const id = crypto.randomUUID();
     const shareToken = crypto.randomBytes(6).toString('hex');
-    const now = new Date().toISOString();
+    const now = new Date();
+    const expiresAt = expiresDays ? new Date(now.getTime() + expiresDays * 86400000).toISOString() : null;
 
     const stmt = this.db.prepare(`
-      INSERT INTO reports (id, scan_id, share_token, visibility, created_at)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO reports (id, scan_id, share_token, visibility, created_at, expires_at)
+      VALUES (?, ?, ?, ?, ?, ?)
     `);
-    stmt.run(id, scanId, shareToken, visibility, now);
+    stmt.run(id, scanId, shareToken, visibility, now.toISOString(), expiresAt);
 
     return { id, shareToken };
   }
 
   getScanIdByShareToken(shareToken: string): string | null {
-    const stmt = this.db.prepare(`SELECT scan_id as scanId FROM reports WHERE share_token = ?`);
-    const row = stmt.get(shareToken) as { scanId: string } | undefined;
-    return row ? row.scanId : null;
+    const stmt = this.db.prepare(`SELECT scan_id as scanId, expires_at as expiresAt FROM reports WHERE share_token = ?`);
+    const row = stmt.get(shareToken) as { scanId: string; expiresAt?: string | null } | undefined;
+    if (!row) return null;
+
+    if (row.expiresAt) {
+      const expiration = new Date(row.expiresAt).getTime();
+      if (Date.now() > expiration) return null; // expired
+    }
+
+    return row.scanId;
+  }
+
+  // --- Daily Usage Limits & Rate-Limiting ---
+  getUsageToday(identifier: string): number {
+    const today = new Date().toISOString().split('T')[0];
+    const stmt = this.db.prepare(`SELECT count FROM usage_records WHERE identifier = ? AND date = ?`);
+    const row = stmt.get(identifier, today) as { count: number } | undefined;
+    return row ? row.count : 0;
+  }
+
+  incrementUsage(identifier: string): number {
+    const today = new Date().toISOString().split('T')[0];
+    const id = crypto.randomUUID();
+    const stmt = this.db.prepare(`
+      INSERT INTO usage_records (id, identifier, date, count)
+      VALUES (?, ?, ?, 1)
+      ON CONFLICT(identifier, date) DO UPDATE SET count = count + 1
+    `);
+    stmt.run(id, identifier, today);
+    return this.getUsageToday(identifier);
   }
 }
