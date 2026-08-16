@@ -55,11 +55,11 @@ export const WaterfallView: React.FC<WaterfallViewProps> = ({ resources }) => {
       {/* Header & Filter Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[rgba(243,240,232,0.08)] pb-4">
         <div>
-          <h3 className="text-sm sm:text-base font-bold text-[#F3F0E8] tracking-tight flex items-center gap-2">
+          <h3 className="text-sm sm:text-base font-display font-bold text-[#F3F0E8] tracking-tight flex items-center gap-2">
             <Activity className="w-4 h-4 text-[#FF6B35]" />
             <span>Request Waterfall Timeline</span>
           </h3>
-          <p className="text-xs text-[#8E8A82] mt-0.5">
+          <p className="text-xs font-sans text-[#8E8A82] mt-0.5">
             Chronological load duration and byte weight of assets loaded by the browser engine.
           </p>
         </div>

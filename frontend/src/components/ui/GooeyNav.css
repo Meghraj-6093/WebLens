@@ -43,9 +43,11 @@
 .gooey-nav-container nav ul li a {
   display: inline-block;
   padding: 0.35rem 0.85rem;
+  font-family: var(--font-display, 'Space Grotesk', system-ui, sans-serif);
   font-size: 0.75rem;
   font-weight: 600;
   line-height: 1rem;
+  letter-spacing: -0.015em;
   color: #8E8A82;
   transition: color 0.2s ease;
   text-decoration: none;
@@ -100,10 +102,12 @@
 }
 
 .gooey-nav-container .effect.text {
+  font-family: var(--font-display, 'Space Grotesk', system-ui, sans-serif);
   color: #8E8A82;
   font-size: 0.75rem;
   font-weight: 700;
   line-height: 1rem;
+  letter-spacing: -0.015em;
   white-space: nowrap;
   transition: color 0.3s ease;
   z-index: 4;

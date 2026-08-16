@@ -70,26 +70,26 @@ export const CategoryScoreCards: React.FC<CategoryScoreCardsProps> = ({
           >
             <div>
               <div className="flex items-center justify-between gap-1 mb-2.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="p-1.5 rounded-lg bg-[#151A21] group-hover:scale-110 transition-transform">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <div className="p-1.5 rounded-lg bg-[#151A21] group-hover:scale-110 transition-transform shrink-0">
                     {meta.icon}
                   </div>
-                  <span className="text-xs font-semibold text-[#F3F0E8] truncate">{meta.title}</span>
+                  <span className="text-xs font-display font-semibold text-[#F3F0E8] truncate">{meta.title}</span>
                 </div>
-                <span className="text-[10px] font-mono text-[#8E8A82] shrink-0">{meta.weight}</span>
+                <span className="text-[10px] font-display font-medium text-[#8E8A82] shrink-0">{meta.weight}</span>
               </div>
 
               <div className="flex items-baseline justify-between mt-3">
-                <span className="text-2xl font-extrabold font-mono tracking-tight text-[#F3F0E8]">
+                <span className="text-2xl font-bold font-display tracking-tight text-[#F3F0E8]">
                   {score}
                 </span>
-                <span className={cn('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', getScoreColor(score))}>
+                <span className={cn('text-[10px] font-display font-bold uppercase px-2 py-0.5 rounded-full border', getScoreColor(score))}>
                   {catData?.rating || 'Score'}
                 </span>
               </div>
             </div>
 
-            <div className="mt-3.5 pt-2.5 border-t border-[rgba(243,240,232,0.08)] flex items-center justify-between text-[11px] text-[#8E8A82]">
+            <div className="mt-3.5 pt-2.5 border-t border-[rgba(243,240,232,0.08)] flex items-center justify-between text-[11px] font-sans text-[#8E8A82]">
               <span>{failedCount === 0 ? 'All passed' : `${failedCount} issue${failedCount > 1 ? 's' : ''}`}</span>
               {onOpenBreakdown ? (
                 <button

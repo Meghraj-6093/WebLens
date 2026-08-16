@@ -117,18 +117,18 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
           />
         </svg>
 
-        {/* Center Score Number */}
+        {/* Center Score Number (Space Grotesk 700-800) */}
         <div className="absolute inset-0 flex flex-col items-center justify-center">
           <span
             className={cn(
-              'font-extrabold font-mono tracking-tight text-[#F3F0E8] transition-colors duration-300',
+              'font-extrabold font-display tracking-tight text-[#F3F0E8] transition-colors duration-300',
               size === 'sm' ? 'text-lg' : size === 'md' ? 'text-3xl' : 'text-5xl'
             )}
           >
             {boundedScore}
           </span>
           {size !== 'sm' && (
-            <span className="text-[10px] uppercase font-bold text-[#8E8A82] -mt-0.5 tracking-wider">
+            <span className="text-[10px] uppercase font-display font-bold text-[#8E8A82] -mt-0.5 tracking-wider">
               / 100
             </span>
           )}
@@ -138,13 +138,13 @@ export const ScoreGauge: React.FC<ScoreGaugeProps> = ({
       {/* Label and Rating Text */}
       {(label || showRating) && (
         <div className="mt-2.5 space-y-0.5">
-          {label && <div className="text-xs font-semibold text-[#D8D4CA]">{label}</div>}
+          {label && <div className="text-xs font-display font-semibold text-[#D8D4CA]">{label}</div>}
           {showRating && (
-            <div className="text-[11px] font-bold uppercase tracking-wider text-[#FF6B35]">
+            <div className="text-[11px] font-display font-bold uppercase tracking-wider text-[#FF6B35]">
               {config.rating}
             </div>
           )}
-          {subLabel && <div className="text-[11px] text-[#8E8A82]">{subLabel}</div>}
+          {subLabel && <div className="text-[11px] font-sans text-[#8E8A82]">{subLabel}</div>}
         </div>
       )}
     </div>

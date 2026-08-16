@@ -21,7 +21,7 @@ export const App: React.FC = () => {
     <ErrorBoundary>
       <div className="min-h-screen bg-[#080A0E] text-[#F3F0E8] flex flex-col font-sans selection:bg-[#FF6B35] selection:text-[#080A0E]">
         <Header />
-        <main className="flex-1">
+        <main className="flex-1 pt-4 sm:pt-6">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/dashboard" element={<DashboardPage />} />

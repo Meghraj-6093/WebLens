@@ -45,8 +45,10 @@ export default {
         }
       },
       fontFamily: {
+        display: ['"Space Grotesk"', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        body: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'SFMono-Regular', 'Consolas', 'monospace'],
       },
       boxShadow: {
         'orange-glow': '0 0 24px rgba(255, 107, 53, 0.15)',

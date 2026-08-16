@@ -53,17 +53,17 @@ export const HomePage: React.FC = () => {
       {/* Hero Section */}
       <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 text-center space-y-10">
         {/* Capability Pill */}
-        <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#FF6B35]/10 border border-[#FF6B35]/25 text-[#FF6B35] text-[11px] sm:text-xs font-semibold shadow-sm max-w-full text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-[#FF6B35]/10 border border-[#FF6B35]/25 text-[#FF6B35] text-[11px] sm:text-xs font-display font-medium shadow-sm max-w-full text-center">
           <Sparkles className="w-3.5 h-3.5 shrink-0" />
           <span className="truncate sm:whitespace-normal">Precision Web Diagnostics • Lighthouse • SEO • A11y • Security</span>
         </div>
 
         {/* Headline */}
         <div className="space-y-4 max-w-3xl mx-auto">
-          <h1 className="text-4xl sm:text-6xl font-extrabold text-[#F3F0E8] tracking-tight leading-[1.08]">
-            See what’s wrong with your website.
+          <h1 className="font-display text-4xl sm:text-6xl lg:text-[4rem] font-bold text-[#F3F0E8] tracking-[-0.04em] leading-[1.02]">
+            See what’s wrong with <br className="hidden sm:inline" />your website.
           </h1>
-          <p className="text-base sm:text-lg text-[#D8D4CA] max-w-2xl mx-auto leading-relaxed">
+          <p className="font-sans font-normal text-base sm:text-lg text-[#D8D4CA] max-w-2xl mx-auto leading-relaxed">
             Enter any URL for a comprehensive technical health audit. Results and history are saved directly to your browser with zero accounts or trackers.
           </p>
         </div>
@@ -82,7 +82,7 @@ export const HomePage: React.FC = () => {
                 onChange={(e) => setUrl(e.target.value)}
                 placeholder="Enter URL (e.g., yourwebsite.com)"
                 disabled={isLoading}
-                className="w-full bg-transparent text-sm sm:text-base text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none font-mono selection:bg-[#FF6B35] selection:text-[#080A0E]"
+                className="w-full bg-transparent text-sm sm:text-base text-[#F3F0E8] placeholder-[#8E8A82] focus:outline-none font-sans font-normal selection:bg-[#FF6B35] selection:text-[#080A0E]"
               />
             </div>
             <Button
@@ -90,7 +90,7 @@ export const HomePage: React.FC = () => {
               size="md"
               variant="primary"
               isLoading={isLoading}
-              className="shrink-0 text-sm font-bold sm:px-6 py-3"
+              className="shrink-0 text-sm font-display font-semibold sm:px-6 py-3"
               rightIcon={<ArrowRight className="w-4 h-4" />}
             >
               Analyze Website
@@ -98,14 +98,14 @@ export const HomePage: React.FC = () => {
           </form>
 
           {/* Quick example click chips */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mt-3.5 text-xs text-[#8E8A82]">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3.5 text-xs text-[#8E8A82] font-sans">
             <span>Try an example:</span>
             {sampleDomains.map((d) => (
               <button
                 key={d}
                 type="button"
                 onClick={() => setUrl(d)}
-                className="font-mono px-2 py-0.5 rounded bg-[#151A21] border border-[rgba(243,240,232,0.10)] text-[#D8D4CA] hover:text-[#FF6B35] hover:border-[#FF6B35]/40 transition-colors"
+                className="font-sans text-xs px-2.5 py-0.5 rounded-md bg-[#151A21] border border-[rgba(243,240,232,0.10)] text-[#D8D4CA] hover:text-[#FF6B35] hover:border-[#FF6B35]/40 transition-colors"
               >
                 {d}
               </button>

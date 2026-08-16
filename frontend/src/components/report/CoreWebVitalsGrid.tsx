@@ -59,11 +59,11 @@ export const CoreWebVitalsGrid: React.FC<CoreWebVitalsGridProps> = ({ metrics })
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-bold text-[#F3F0E8] tracking-tight flex items-center gap-2">
+          <h3 className="text-sm font-display font-bold text-[#F3F0E8] tracking-tight flex items-center gap-2">
             <Zap className="w-4 h-4 text-[#FF6B35]" />
             <span>Core Web Vitals & Real-User Performance Metrics</span>
           </h3>
-          <p className="text-xs text-[#8E8A82] mt-0.5">
+          <p className="text-xs font-sans text-[#8E8A82] mt-0.5">
             Key field & lab measurements defining user perception, visual stability, and interaction speed.
           </p>
         </div>
@@ -81,9 +81,9 @@ export const CoreWebVitalsGrid: React.FC<CoreWebVitalsGridProps> = ({ metrics })
                 <div className="p-1.5 rounded-lg bg-[#151A21] group-hover:scale-105 transition-transform">
                   {getMetricIcon(m.id)}
                 </div>
-                <span className="text-xs font-semibold text-[#F3F0E8]">{m.name.split('(')[0]}</span>
+                <span className="text-xs font-display font-semibold text-[#F3F0E8]">{m.name.split('(')[0]}</span>
               </div>
-              <span className={cn('text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border', getStatusBadge(m.status))}>
+              <span className={cn('text-[10px] font-display font-bold uppercase px-2 py-0.5 rounded-full border', getStatusBadge(m.status))}>
                 {m.status.replace('_', ' ')}
               </span>
             </div>
@@ -91,7 +91,7 @@ export const CoreWebVitalsGrid: React.FC<CoreWebVitalsGridProps> = ({ metrics })
             {/* Metric Value */}
             <div className="flex items-baseline justify-between pt-1">
               <span className={cn(
-                'text-3xl font-extrabold font-mono tracking-tight',
+                'text-3xl font-bold font-display tracking-tight',
                 m.status === 'good' ? 'text-[#34D399]' : m.status === 'needs_improvement' ? 'text-[#FF6B35]' : 'text-rose-400'
               )}>
                 {m.value}
@@ -102,7 +102,7 @@ export const CoreWebVitalsGrid: React.FC<CoreWebVitalsGridProps> = ({ metrics })
             </div>
 
             {/* Metric Description */}
-            <div className="pt-2 border-t border-[rgba(243,240,232,0.08)] text-[11px] text-[#8E8A82] leading-relaxed">
+            <div className="pt-2 border-t border-[rgba(243,240,232,0.08)] text-[11px] font-sans text-[#8E8A82] leading-relaxed">
               {m.description}
             </div>
           </div>

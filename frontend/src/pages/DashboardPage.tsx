@@ -122,46 +122,46 @@ export const DashboardPage: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="card-glow rounded-2xl p-5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-2">
           <div className="flex items-center justify-between text-[#8E8A82]">
-            <span className="text-xs font-semibold">Saved Audits</span>
+            <span className="text-xs font-display font-semibold">Saved Audits</span>
             <Activity className="w-4 h-4 text-[#FF6B35]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#F3F0E8] font-mono tracking-tight">
+          <div className="text-3xl font-bold font-display text-[#F3F0E8] tracking-tight">
             {stats.totalScans}
           </div>
-          <div className="text-[11px] text-[#6E6A63]">{stats.uniqueDomains} unique domains</div>
+          <div className="text-[11px] font-sans text-[#6E6A63]">{stats.uniqueDomains} unique domains</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-2">
           <div className="flex items-center justify-between text-[#8E8A82]">
-            <span className="text-xs font-semibold">Average Health Score</span>
+            <span className="text-xs font-display font-semibold">Average Health Score</span>
             <TrendingUp className="w-4 h-4 text-[#34D399]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#FF6B35] font-mono tracking-tight">
+          <div className="text-3xl font-bold font-display text-[#FF6B35] tracking-tight">
             {stats.averageScore > 0 ? `${stats.averageScore}/100` : '—'}
           </div>
-          <div className="text-[11px] text-[#6E6A63]">Across your saved audits</div>
+          <div className="text-[11px] font-sans text-[#6E6A63]">Across your saved audits</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-2">
           <div className="flex items-center justify-between text-[#8E8A82]">
-            <span className="text-xs font-semibold">Peak Score</span>
+            <span className="text-xs font-display font-semibold">Peak Score</span>
             <Sparkles className="w-4 h-4 text-[#FF804F]" />
           </div>
-          <div className="text-3xl font-extrabold text-[#F3F0E8] font-mono tracking-tight">
+          <div className="text-3xl font-bold font-display text-[#F3F0E8] tracking-tight">
             {stats.highestScore > 0 ? `${stats.highestScore}/100` : '—'}
           </div>
-          <div className="text-[11px] text-[#6E6A63]">Highest recorded score</div>
+          <div className="text-[11px] font-sans text-[#6E6A63]">Highest recorded score</div>
         </div>
 
         <div className="card-glow rounded-2xl p-5 border border-[rgba(243,240,232,0.08)] bg-[#11151B] space-y-2">
           <div className="flex items-center justify-between text-[#8E8A82]">
-            <span className="text-xs font-semibold">Browser Storage</span>
+            <span className="text-xs font-display font-semibold">Browser Storage</span>
             <HardDrive className="w-4 h-4 text-[#D8D4CA]" />
           </div>
-          <div className="text-xl font-bold text-[#F3F0E8] font-mono tracking-tight">
+          <div className="text-xl font-bold font-display text-[#F3F0E8] tracking-tight">
             {stats.projectsCount} Proj • {stats.monitorsCount} Mon
           </div>
-          <div className="text-[11px] text-[#6E6A63]">Stored in IndexedDB</div>
+          <div className="text-[11px] font-sans text-[#6E6A63]">Stored in IndexedDB</div>
         </div>
       </div>
 

@@ -17,17 +17,36 @@
   --wl-orange: #FF6B35;
   --wl-orange-light: #FF804F;
   --wl-orange-dark: #D94F20;
-  --wl-orange-subtle: rgba(255, 107, 53, 0.12);
+  --font-display: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', SFMono-Regular, Consolas, monospace;
 
-  --wl-border: rgba(243, 240, 232, 0.08);
-  --wl-border-strong: rgba(243, 240, 232, 0.16);
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
 }
 
 @layer base {
   body {
     background-color: #080A0E;
     color: #F3F0E8;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: var(--font-body);
+    font-weight: 400;
+    line-height: 1.6;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
+    letter-spacing: -0.035em;
+    font-weight: 700;
+  }
+
+  button, .btn {
+    font-family: var(--font-display);
+    letter-spacing: -0.015em;
   }
 
   ::selection {
