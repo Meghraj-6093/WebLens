@@ -83,7 +83,14 @@ export const IssueCard: React.FC<IssueCardProps> = ({ issue }) => {
           className="p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer select-none"
         >
           <div className="flex items-center gap-3 min-w-0">
-            <div className="shrink-0">{getSeverityBadge()}</div>
+            <div className="shrink-0 flex items-center gap-1.5">
+              {getSeverityBadge()}
+              {!issue.passed && issue.scoreImpact !== undefined && issue.scoreImpact > 0 && (
+                <span className="hidden xs:inline-flex px-1.5 py-0.5 rounded-md text-[10px] font-mono font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                  -{issue.scoreImpact} pts
+                </span>
+              )}
+            </div>
             <div className="min-w-0">
               <h4 className="text-xs sm:text-sm font-bold text-white tracking-tight truncate">
                 {issue.title}
