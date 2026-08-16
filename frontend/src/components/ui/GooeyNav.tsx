@@ -10,10 +10,10 @@ export interface GooeyNavProps {
   items: GooeyNavItem[];
   animationTime?: number;
   particleCount?: number;
-  particleDistances?: [number, number];
+  particleDistances?: [number, number] | number[];
   particleR?: number;
   timeVariance?: number;
-  colors?: number[];
+  colors?: number[] | string[];
   initialActiveIndex?: number;
   activeIndex?: number;
   onNavigate?: (item: GooeyNavItem, index: number) => void;
@@ -22,12 +22,8 @@ export interface GooeyNavProps {
 
 export const GooeyNav: React.FC<GooeyNavProps> = ({
   items,
-  animationTime = 550,
-  particleCount = 12,
-  particleDistances = [70, 10],
-  particleR = 80,
-  timeVariance = 180,
-  colors = [1, 1, 1, 2, 2, 1],
+  animationTime = 420,
+  particleCount = 10,
   initialActiveIndex = 0,
   activeIndex: controlledIndex,
   onNavigate,
@@ -37,80 +33,14 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
   const navRef = useRef<HTMLUListElement | null>(null);
   const filterRef = useRef<HTMLSpanElement | null>(null);
   const textRef = useRef<HTMLSpanElement | null>(null);
+  const particleLayerRef = useRef<HTMLDivElement | null>(null);
 
+  const prevIndexRef = useRef<number>(controlledIndex !== undefined ? controlledIndex : initialActiveIndex);
   const [internalActiveIndex, setInternalActiveIndex] = useState<number>(
     controlledIndex !== undefined ? controlledIndex : initialActiveIndex
   );
 
   const activeIndex = controlledIndex !== undefined ? controlledIndex : internalActiveIndex;
-
-  const noise = (n = 1) => n / 2 - Math.random() * n;
-
-  const getXY = (distance: number, pointIndex: number, totalPoints: number): [number, number] => {
-    const angle = ((360 + noise(8)) / totalPoints) * pointIndex * (Math.PI / 180);
-    return [distance * Math.cos(angle), distance * Math.sin(angle)];
-  };
-
-  const createParticle = (i: number, t: number, d: [number, number], r: number) => {
-    const rotate = noise(r / 10);
-    return {
-      start: getXY(d[0], particleCount - i, particleCount),
-      end: getXY(d[1] + noise(7), particleCount - i, particleCount),
-      time: t,
-      scale: 1 + noise(0.2),
-      color: colors[Math.floor(Math.random() * colors.length)],
-      rotate: rotate > 0 ? (rotate + r / 20) * 10 : (rotate - r / 20) * 10
-    };
-  };
-
-  const makeParticles = useCallback(
-    (element: HTMLElement) => {
-      if (typeof window === 'undefined') return;
-      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-      const d = particleDistances;
-      const r = particleR;
-      const bubbleTime = animationTime * 2 + timeVariance;
-      element.style.setProperty('--time', `${bubbleTime}ms`);
-
-      for (let i = 0; i < particleCount; i++) {
-        const t = animationTime * 2 + noise(timeVariance * 2);
-        const p = createParticle(i, t, d, r);
-        element.classList.remove('active');
-
-        const particle = document.createElement('span');
-        const point = document.createElement('span');
-        particle.classList.add('gooey-particle');
-        particle.style.setProperty('--start-x', `${p.start[0]}px`);
-        particle.style.setProperty('--start-y', `${p.start[1]}px`);
-        particle.style.setProperty('--end-x', `${p.end[0]}px`);
-        particle.style.setProperty('--end-y', `${p.end[1]}px`);
-        particle.style.setProperty('--time', `${p.time}ms`);
-        particle.style.setProperty('--scale', `${p.scale}`);
-        particle.style.setProperty('--color', `var(--color-${p.color}, #FF6B35)`);
-        particle.style.setProperty('--rotate', `${p.rotate}deg`);
-
-        point.classList.add('gooey-point');
-        particle.appendChild(point);
-        element.appendChild(particle);
-
-        requestAnimationFrame(() => {
-          element.classList.add('active');
-        });
-
-        setTimeout(() => {
-          try {
-            if (particle.parentNode === element) {
-              element.removeChild(particle);
-            }
-          } catch {
-            // Ignore cleanup race
-          }
-        }, t);
-      }
-    },
-    [animationTime, colors, particleCount, particleDistances, particleR, timeVariance]
-  );
 
   const updateEffectPosition = useCallback((element: HTMLElement) => {
     if (!containerRef.current || !filterRef.current || !textRef.current) return;
@@ -129,33 +59,96 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     textRef.current.innerText = element.innerText.trim();
   }, []);
 
+  const spawnGooeyParticles = useCallback(
+    (oldRect: DOMRect, newRect: DOMRect, containerRect: DOMRect) => {
+      if (!particleLayerRef.current) return;
+      if (typeof window === 'undefined') return;
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+      const layer = particleLayerRef.current;
+      // Clear any prior lingering particles
+      while (layer.firstChild) {
+        layer.removeChild(layer.firstChild);
+      }
+
+      const deltaX = (newRect.left + newRect.width / 2) - (oldRect.left + oldRect.width / 2);
+      const isMovingRight = deltaX >= 0;
+      const count = Math.min(particleCount, 10);
+
+      // Particle colors: primarily Signal Orange (#FF6B35), with warm light accents
+      const particleColors = ['#FF6B35', '#FF6B35', '#FF804F', '#FF6B35', '#F3F0E8'];
+
+      for (let i = 0; i < count; i++) {
+        const particle = document.createElement('span');
+        particle.classList.add('gooey-blob-particle');
+
+        // Distribute origins between old pill and new pill along edges
+        const progress = (i + 0.5) / count;
+        const originX =
+          oldRect.left + oldRect.width / 2 + deltaX * progress * 0.7 - containerRect.left;
+        const originY =
+          newRect.top + newRect.height / 2 + (Math.random() - 0.5) * 8 - containerRect.top;
+
+        // Size between 5px and 9px (compact, not oversized)
+        const size = Math.round(5 + Math.random() * 4);
+        const color = particleColors[i % particleColors.length];
+
+        // Random subtle displacement vector
+        const angle = isMovingRight
+          ? (Math.random() * Math.PI - Math.PI / 2) // splash sideways/up/down
+          : (Math.random() * Math.PI + Math.PI / 2);
+        const distance = 12 + Math.random() * 22;
+        const dx = Math.cos(angle) * distance;
+        const dy = Math.sin(angle) * (10 + Math.random() * 12);
+
+        particle.style.width = `${size}px`;
+        particle.style.height = `${size}px`;
+        particle.style.backgroundColor = color;
+        particle.style.left = `${originX}px`;
+        particle.style.top = `${originY}px`;
+        particle.style.setProperty('--dx', `${dx}px`);
+        particle.style.setProperty('--dy', `${dy}px`);
+        particle.style.setProperty('--scale', `${(0.8 + Math.random() * 0.5).toFixed(2)}`);
+        particle.style.setProperty('--time', `${animationTime}ms`);
+
+        if (color === '#FF6B35') {
+          particle.style.boxShadow = '0 0 6px rgba(255, 107, 53, 0.4)';
+        }
+
+        layer.appendChild(particle);
+
+        setTimeout(() => {
+          try {
+            if (particle.parentNode === layer) {
+              layer.removeChild(particle);
+            }
+          } catch {}
+        }, animationTime + 50);
+      }
+    },
+    [animationTime, particleCount]
+  );
+
   const handleSelect = (index: number, liEl: HTMLElement) => {
     if (activeIndex === index) return;
 
+    if (!containerRef.current || !navRef.current) return;
+    const itemsList = navRef.current.querySelectorAll('li');
+    const oldLi = itemsList[prevIndexRef.current] as HTMLElement | undefined;
+    const containerRect = containerRef.current.getBoundingClientRect();
+
+    if (oldLi && oldLi !== liEl) {
+      const oldRect = oldLi.getBoundingClientRect();
+      const newRect = liEl.getBoundingClientRect();
+      spawnGooeyParticles(oldRect, newRect, containerRect);
+    }
+
+    prevIndexRef.current = index;
     if (controlledIndex === undefined) {
       setInternalActiveIndex(index);
     }
 
     updateEffectPosition(liEl);
-
-    if (filterRef.current) {
-      const particles = filterRef.current.querySelectorAll('.gooey-particle');
-      particles.forEach(p => {
-        try {
-          filterRef.current?.removeChild(p);
-        } catch {}
-      });
-    }
-
-    if (textRef.current) {
-      textRef.current.classList.remove('active');
-      void textRef.current.offsetWidth;
-      textRef.current.classList.add('active');
-    }
-
-    if (filterRef.current) {
-      makeParticles(filterRef.current);
-    }
 
     if (onNavigate) {
       onNavigate(items[index], index);
@@ -186,7 +179,6 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
     const activeLi = itemsList[activeIndex] as HTMLElement | undefined;
     if (activeLi) {
       updateEffectPosition(activeLi);
-      textRef.current?.classList.add('active');
     }
 
     const resizeObserver = new ResizeObserver(() => {
@@ -221,7 +213,11 @@ export const GooeyNav: React.FC<GooeyNavProps> = ({
           })}
         </ul>
       </nav>
+      {/* Particle layer positioned under text and around the moving pill */}
+      <div className="gooey-particle-layer" ref={particleLayerRef} />
+      {/* Active Morph Pill Filter */}
       <span className="effect filter" ref={filterRef} />
+      {/* Active Morph Pill Text */}
       <span className="effect text" ref={textRef} />
     </div>
   );

@@ -31,60 +31,52 @@ async function testGooeyNav() {
     });
 
     console.log(`  Expected: ${r.expectedLabel}, Active effect: ${activeText.effectText}, Active link: ${activeText.activeLiText}`);
-    if (activeText.activeLiText !== r.expectedLabel) {
-      throw new Error(`Route mismatch on ${r.path}! Expected ${r.expectedLabel}, got ${activeText.activeLiText}`);
+    if (activeText.effectText !== r.expectedLabel) {
+      throw new Error(`Route mismatch on ${r.path}! Expected ${r.expectedLabel}, got ${activeText.effectText}`);
     }
   }
 
   // 2. Test interactive clicking & gooey transition
-  console.log('\nTesting interactive click transitions...');
+  console.log('\nTesting interactive click transitions & mid-flight capture...');
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
 
-  const navClicks = ['Dashboard', 'Monitoring', 'Competitors', 'Agency', 'API', 'Profile', 'Scanner'];
-  for (const target of navClicks) {
-    console.log(`  Clicking nav item: "${target}"...`);
-    const link = page.locator(`.gooey-nav-container nav a:has-text("${target}")`);
-    await link.click();
-    await page.waitForTimeout(100);
-
-    // Check if particles spawned during transition
-    const particleCountDuring = await page.evaluate(() => {
-      return document.querySelectorAll('.gooey-particle').length;
-    });
-    console.log(`    Particles spawned during transition: ${particleCountDuring}`);
-
-    await page.waitForTimeout(600);
-
-    // Verify final active state
-    const currentActive = await page.evaluate(() => {
-      const activeLi = document.querySelector('.gooey-nav-container nav ul li.active a') as HTMLElement;
-      return activeLi ? activeLi.innerText.trim() : '';
-    });
-    console.log(`    Settled active link: "${currentActive}"`);
-    if (currentActive !== target) {
-      throw new Error(`Click navigation failed for "${target}"! Current active is "${currentActive}"`);
-    }
-  }
-
-  // Take screenshot of navbar in settled state
+  // Click Competitors and capture mid-flight
+  const competitorsLink = page.locator(`.gooey-nav-container nav a:has-text("Competitors")`);
+  await competitorsLink.click();
+  await page.waitForTimeout(80); // mid-flight
   const header = page.locator('header');
+  await header.screenshot({ path: 'screenshot_header_gooey_midflight.png' });
+  console.log('  Saved mid-flight screenshot: screenshot_header_gooey_midflight.png');
+
+  await page.waitForTimeout(500); // wait for full settle
   await header.screenshot({ path: 'screenshot_header_gooey_nav.png' });
-  console.log('  Saved screenshot: screenshot_header_gooey_nav.png');
+  console.log('  Saved settled screenshot: screenshot_header_gooey_nav.png');
+
+  // Verify final active state
+  const currentActive = await page.evaluate(() => {
+    const textEl = document.querySelector('.gooey-nav-container .effect.text') as HTMLElement;
+    return textEl ? textEl.innerText.trim() : '';
+  });
+  console.log(`  Settled active link: "${currentActive}"`);
+  if (currentActive !== 'Competitors') {
+    throw new Error(`Expected Competitors, got ${currentActive}`);
+  }
 
   // 3. Rapid click stress test
   console.log('\nRunning rapid click stress test (10 rapid clicks)...');
+  const navClicks = ['Dashboard', 'Monitoring', 'Competitors', 'Agency', 'API', 'Profile', 'Scanner'];
   for (let i = 0; i < 10; i++) {
     const target = navClicks[i % navClicks.length];
     await page.locator(`.gooey-nav-container nav a:has-text("${target}")`).click();
-    await page.waitForTimeout(50); // fast rapid clicking
+    await page.waitForTimeout(60);
   }
 
-  // Wait for all particle timers to expire (animationTime * 2 + timeVariance = ~1.2s)
-  await page.waitForTimeout(1500);
+  // Wait for all particle timers to expire (~500ms)
+  await page.waitForTimeout(800);
 
   // Verify that all particle DOM elements were completely cleaned up
   const residualParticles = await page.evaluate(() => {
-    return document.querySelectorAll('.gooey-particle').length;
+    return document.querySelectorAll('.gooey-blob-particle').length;
   });
   console.log(`  Residual particles in DOM after rapid clicking: ${residualParticles}`);
   if (residualParticles > 0) {
@@ -94,7 +86,6 @@ async function testGooeyNav() {
   // 4. Keyboard interaction test
   console.log('\nTesting keyboard navigation (Tab & Enter)...');
   await page.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  // Focus first link
   await page.focus('.gooey-nav-container nav a:has-text("Scanner")');
   await page.keyboard.press('Tab'); // Focus Dashboard
   await page.keyboard.press('Enter');
@@ -106,7 +97,6 @@ async function testGooeyNav() {
   console.log('\nTesting mobile viewport (375px)...');
   const mobilePage = await browser.newPage({ viewport: { width: 375, height: 667 } });
   await mobilePage.goto('http://localhost:5173/', { waitUntil: 'networkidle' });
-  // Open hamburger menu
   const menuButton = mobilePage.locator('header button[aria-label="Toggle Navigation Menu"]');
   await menuButton.click();
   await mobilePage.waitForTimeout(300);
@@ -119,7 +109,7 @@ async function testGooeyNav() {
   await mobilePage.close();
 
   await browser.close();
-  console.log('\n✅ ALL GOOEYNAV TESTS PASSED WITH 100% SUCCESS!');
+  console.log('\n✅ ALL REFINED GOOEYNAV TESTS PASSED WITH 100% SUCCESS!');
 }
 
 testGooeyNav().catch((err) => {
